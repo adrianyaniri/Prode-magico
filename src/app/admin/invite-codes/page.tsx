@@ -170,12 +170,12 @@ export default function InviteCodesPage() {
                 <p className="mb-3 text-sm font-bold text-blue-800">Instalá la app</p>
                 <div className="rounded-xl border-2 border-blue-300 bg-white p-3 inline-block">
                   <QRCode
-                    value={window.location.origin}
+                    value={`${window.location.origin}/install?invite=${selectedCode}`}
                     size={150}
                     style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                   />
                 </div>
-                <p className="mt-3 text-xs text-blue-600">Escaneá → tocá los 3 puntitos → <strong>"Agregar a inicio"</strong></p>
+                <p className="mt-3 text-xs text-blue-600">Escaneá → tocá <strong>"📲 Instalar App"</strong></p>
               </div>
 
               {/* Step 2: Register */}
