@@ -159,18 +159,42 @@ export default function InviteCodesPage() {
 
       {selectedCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" onClick={() => setSelectedCode(null)}>
-          <div className="rounded-2xl bg-white p-6 text-center shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <h3 className="mb-4 text-xl font-bold text-black">Escaneá para sumarte</h3>
-            <div className="mx-auto rounded-xl border-4 border-black p-4 inline-block bg-white">
-              <QRCode 
-                value={`${window.location.origin}/auth/sign-in?invite=${selectedCode}`} 
-                size={256} 
-                style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-              />
+          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-2 text-center text-xl font-black text-black">¡Sumarse al Prode Mágico!</h3>
+            <p className="mb-6 text-center text-sm text-zinc-500">Seguí los 2 pasos desde el celular</p>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Step 1: Install */}
+              <div className="flex flex-col items-center rounded-2xl border-2 border-blue-200 bg-blue-50 p-4 text-center">
+                <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">1</div>
+                <p className="mb-3 text-sm font-bold text-blue-800">Instalá la app</p>
+                <div className="rounded-xl border-2 border-blue-300 bg-white p-3 inline-block">
+                  <QRCode
+                    value={window.location.origin}
+                    size={150}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  />
+                </div>
+                <p className="mt-3 text-xs text-blue-600">Escaneá → tocá los 3 puntitos → <strong>"Agregar a inicio"</strong></p>
+              </div>
+
+              {/* Step 2: Register */}
+              <div className="flex flex-col items-center rounded-2xl border-2 border-green-200 bg-green-50 p-4 text-center">
+                <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-sm font-black text-white">2</div>
+                <p className="mb-3 text-sm font-bold text-green-800">Registrate</p>
+                <div className="rounded-xl border-2 border-green-300 bg-white p-3 inline-block">
+                  <QRCode
+                    value={`${window.location.origin}/auth/sign-in?invite=${selectedCode}`}
+                    size={150}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  />
+                </div>
+                <p className="mt-2 font-mono text-lg font-black tracking-widest text-green-700">{selectedCode}</p>
+                <p className="text-xs text-green-600">El código ya viene incluido</p>
+              </div>
             </div>
-            <p className="mt-4 font-mono text-2xl font-black tracking-widest text-blue-600">{selectedCode}</p>
-            <p className="mt-1 text-xs text-zinc-500">El código ya está incluido en el QR</p>
-            <button 
+
+            <button
               className="mt-6 w-full rounded-xl bg-zinc-200 px-6 py-3 font-bold text-zinc-800 transition-colors hover:bg-zinc-300"
               onClick={() => setSelectedCode(null)}
             >
