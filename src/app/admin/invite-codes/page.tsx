@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import QRCode from "react-qr-code";
 
 type InviteCode = {
   id: number;
@@ -18,6 +19,7 @@ export default function InviteCodesPage() {
   const [newMaxUses, setNewMaxUses] = useState("1");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
 
   async function fetchCodes() {
     const { data } = await supabase
@@ -121,6 +123,9 @@ export default function InviteCodesPage() {
               <th className="hidden px-3 py-3 text-right text-xs font-medium uppercase text-zinc-500 sm:table-cell">
                 Created
               </th>
+              <th className="px-3 py-3 text-right text-xs font-medium uppercase text-zinc-500">
+                QR
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800">
@@ -138,11 +143,42 @@ export default function InviteCodesPage() {
                 <td className="hidden px-3 py-3 text-right text-xs text-zinc-600 sm:table-cell">
                   {new Date(code.created_at).toLocaleDateString()}
                 </td>
+                <td className="px-3 py-3 text-right">
+                  <button 
+                    onClick={() => setSelectedCode(code.code)}
+                    className="rounded bg-blue-600/20 px-2 py-1 text-xs font-bold text-blue-400 hover:bg-blue-600/40"
+                  >
+                    QR
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {selectedCode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" onClick={() => setSelectedCode(null)}>
+          <div className="rounded-2xl bg-white p-6 text-center shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-4 text-xl font-bold text-black">Escaneá para sumarte</h3>
+            <div className="mx-auto rounded-xl border-4 border-black p-4 inline-block bg-white">
+              <QRCode 
+                value={`${window.location.origin}/auth/sign-in?invite=${selectedCode}`} 
+                size={256} 
+                style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+              />
+            </div>
+            <p className="mt-4 font-mono text-2xl font-black tracking-widest text-blue-600">{selectedCode}</p>
+            <p className="mt-1 text-xs text-zinc-500">El código ya está incluido en el QR</p>
+            <button 
+              className="mt-6 w-full rounded-xl bg-zinc-200 px-6 py-3 font-bold text-zinc-800 transition-colors hover:bg-zinc-300"
+              onClick={() => setSelectedCode(null)}
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
