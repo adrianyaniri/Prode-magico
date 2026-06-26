@@ -1,0 +1,54 @@
+# openspec/config.yaml — SDD bootstrap for mundial-prode
+schema: spec-driven
+
+context: |
+  Project: mundial-prode — private World Cup 2026 prediction pool (prode) PWA
+  Stack: Next.js 16.2.9 (App Router), React 19.2.4, TypeScript 5 (strict), Tailwind CSS v4
+  Persistence: Supabase (supabase-js + @supabase/ssr)
+  PWA: Serwist 9.5.11
+  Utilities: date-fns, PostCSS
+  Path alias: @/* → ./src/*
+  Delivery: ask-on-risk, 400-line review budget
+
+testing:
+  strict_tdd: false
+  reason: "No test runner detected in devDependencies. Add vitest or jest before enabling TDD."
+  runner: null
+  layers:
+    unit: { available: false, tool: null }
+    integration: { available: false, tool: null }
+    e2e: { available: false, tool: null }
+  coverage: { available: false, command: null }
+  quality:
+    linter: { available: true, command: "eslint" }
+    type_checker: { available: true, command: "tsc" }
+    formatter: { available: false, command: null }
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Frame scope relative to WC2026 timeline
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include data flow diagrams for prediction submission flow
+    - Document Supabase RLS policy decisions with rationale
+    - Consider PWA offline behavior in all architecture decisions
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing Next.js App Router patterns
+    - Respect the 400-line review budget — split PRs if needed
+    - Keep PWA service worker config in sync with changes
+  verify:
+    test_command: "echo 'No test runner configured. Run npm test once a runner is installed.'"
+    build_command: "npm run build"
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+
+language:
+  artifacts: english
+  comments_context: default
