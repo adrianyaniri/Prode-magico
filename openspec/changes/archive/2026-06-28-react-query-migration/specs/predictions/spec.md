@@ -1,14 +1,24 @@
-# Predictions Specification
+# Delta for Predictions
 
-## Purpose
+## ADDED Requirements
 
-Allow authenticated users to submit and update predictions for R32+ knockout matches. Predictions lock at match kickoff. Group stage predictions are not supported.
+### Requirement: Offline Mutation Blocking
 
-## Requirements
+The system MUST prevent users from submitting or updating predictions when the network is offline.
+
+#### Scenario: Offline mutation attempt
+
+- GIVEN the user is offline
+- WHEN the user attempts to submit or update a prediction
+- THEN the mutation is blocked
+- AND the UI displays an error or warning indicating that the action cannot be performed offline
+
+## MODIFIED Requirements
 
 ### Requirement: Submit Prediction
 
 A user MUST be able to submit a score prediction (home goals, away goals) for any R32+ match where the current time is before kickoff. Predictions are stored per user per match in a `predictions` table. The submission MUST apply an optimistic update to the React Query cache before the network request completes, and revert it if the request fails.
+(Previously: A user MUST be able to submit a score prediction (home goals, away goals) for any R32+ match where the current time is before kickoff. Predictions are stored per user per match in a `predictions` table.)
 
 #### Scenario: Happy path — submit prediction
 
@@ -36,6 +46,7 @@ A user MUST be able to submit a score prediction (home goals, away goals) for an
 ### Requirement: Update Prediction Before Kickoff
 
 The user MUST be able to update their prediction any number of times before kickoff. Each update overwrites the previous prediction in the `predictions` table. The update MUST apply an optimistic update to the React Query cache, reverting on failure.
+(Previously: The user MUST be able to update their prediction any number of times before kickoff. Each update overwrites the previous prediction in the `predictions` table.)
 
 #### Scenario: Update existing prediction
 
@@ -51,32 +62,3 @@ The user MUST be able to update their prediction any number of times before kick
 - WHEN the user changes it to 2-1 but the network request fails
 - THEN the UI reverts the optimistic update back to 1-0
 - AND an error message is displayed to the user
-
-### Requirement: Lock at Kickoff
-
-Predictions MUST lock when the current time passes each match's kickoff time. Any submit or update attempt after lock MUST be rejected.
-
-#### Scenario: Prediction rejected after kickoff
-
-- GIVEN a match kicked off at 17:00 and current time is 17:05
-- WHEN the user attempts to submit or update a prediction
-- THEN the API returns a 403 error "Match has already started"
-- AND the UI shows "Predictions locked" with disabled inputs
-
-#### Scenario: Unauthenticated prediction rejected
-
-- GIVEN a user is not logged in
-- WHEN they attempt to submit a prediction
-- THEN the API returns a 401 error
-- AND the UI shows "Sign in to predict"
-
-### Requirement: Offline Mutation Blocking
-
-The system MUST prevent users from submitting or updating predictions when the network is offline.
-
-#### Scenario: Offline mutation attempt
-
-- GIVEN the user is offline
-- WHEN the user attempts to submit or update a prediction
-- THEN the mutation is blocked
-- AND the UI displays an error or warning indicating that the action cannot be performed offline

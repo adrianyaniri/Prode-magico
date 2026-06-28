@@ -2,10 +2,10 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { isBefore, parseISO } from "date-fns";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TEAM_NAMES_ES } from "@/lib/sync/teams-es";
 import { TEAM_CRESTS } from "@/lib/sync/teams-crests";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 type Prediction = {
   id: number;
@@ -32,27 +32,83 @@ export default function PredictionForm({
   awayTeam: string;
   isKnockout?: boolean;
 }) {
-  const router = useRouter();
   const supabase = createClient();
-  const [homeScore, setHomeScore] = useState(
-    existingPrediction?.home_score ?? 0,
+  const queryClient = useQueryClient();
+
+  const queryKey = ["predictions", userId, matchId] as const;
+
+  const { data: prediction } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("predictions")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("match_id", matchId)
+        .single();
+      return data as Prediction;
+    },
+    initialData: existingPrediction,
+  });
+
+  const [homeScore, setHomeScore] = useState(prediction?.home_score ?? 0);
+  const [awayScore, setAwayScore] = useState(prediction?.away_score ?? 0);
+  const [predictedAdvancer, setPredictedAdvancer] = useState<string | null>(
+    prediction?.predicted_advancer ?? null
   );
-  const [awayScore, setAwayScore] = useState(
-    existingPrediction?.away_score ?? 0,
-  );
-  const [saving, setSaving] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [predictedAdvancer, setPredictedAdvancer] = useState<string | null>(
-    existingPrediction?.predicted_advancer ?? null
-  );
 
   const isDraw = homeScore === awayScore;
   const showPenaltySelector = isKnockout && isDraw;
 
   const kickoff = parseISO(kickoffAt);
   const isPast = isBefore(kickoff, new Date());
+
+  const mutation = useMutation({
+    mutationFn: async (newPrediction: any) => {
+      if (!navigator.onLine) {
+        throw new Error("No podés guardar sin conexión.");
+      }
+      const { error: upsertError } = await supabase.from("predictions").upsert(
+        newPrediction,
+        {
+          onConflict: "user_id, match_id",
+          ignoreDuplicates: false,
+        }
+      );
+      if (upsertError) throw new Error(upsertError.message);
+    },
+    onMutate: async (newPrediction) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData(queryKey);
+      queryClient.setQueryData(queryKey, { ...(previous as any || {}), ...newPrediction });
+      return { previous };
+    },
+    onError: (err, newPrediction, context) => {
+      setError(err.message);
+      if (context?.previous) {
+        queryClient.setQueryData(queryKey, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onSuccess: () => {
+      const phrases = [
+        "Guardado. Si le pegás, pago el asado. 🥩",
+        "Guardado. Que Dios y la Patria te lo demanden. 🇦🇷",
+        "Guardado. Anulo mufa 🤞",
+        "Guardado. Se nota que sabés de fútbol. ⚽",
+        "Guardado. Alta fe le tenés. 🙏",
+      ];
+      setSuccessMsg(phrases[Math.floor(Math.random() * phrases.length)]);
+      setSuccess(true);
+    },
+  });
+
   if (isPast) return null;
 
   function handleIncrementHome() {
@@ -74,40 +130,16 @@ export default function PredictionForm({
 
   async function handleSubmit() {
     setError(null);
-    setSaving(true);
-
-    const { error: upsertError } = await supabase.from("predictions").upsert(
-      {
-        user_id: userId,
-        match_id: matchId,
-        home_score: homeScore,
-        away_score: awayScore,
-        predicted_advancer: showPenaltySelector ? predictedAdvancer : null,
-      },
-      {
-        onConflict: "user_id, match_id",
-        ignoreDuplicates: false,
-      },
-    );
-
-    if (upsertError) {
-      setError(upsertError.message);
-      setSaving(false);
-      return;
-    }
-
-    const phrases = [
-      "Guardado. Si le pegás, pago el asado. 🥩",
-      "Guardado. Que Dios y la Patria te lo demanden. 🇦🇷",
-      "Guardado. Anulo mufa 🤞",
-      "Guardado. Se nota que sabés de fútbol. ⚽",
-      "Guardado. Alta fe le tenés. 🙏",
-    ];
-    setSuccessMsg(phrases[Math.floor(Math.random() * phrases.length)]);
-    setSuccess(true);
-    setSaving(false);
-    router.refresh();
+    mutation.mutate({
+      user_id: userId,
+      match_id: matchId,
+      home_score: homeScore,
+      away_score: awayScore,
+      predicted_advancer: showPenaltySelector ? predictedAdvancer : null,
+    });
   }
+
+  const saving = mutation.isPending;
 
   if (success) {
     return (
@@ -130,9 +162,9 @@ export default function PredictionForm({
             <span className="text-sm font-medium text-white">{TEAM_NAMES_ES[awayTeam] ?? awayTeam}</span>
             <span className="text-xl font-bold text-white">{awayScore}</span>
           </div>
-          {existingPrediction?.predicted_advancer && (
+          {prediction?.predicted_advancer && (
             <div className="mt-2 text-center text-[10px] font-medium text-zinc-400 uppercase tracking-wider">
-              {TEAM_NAMES_ES[existingPrediction.predicted_advancer] ?? existingPrediction.predicted_advancer} pasa por penales
+              {TEAM_NAMES_ES[prediction.predicted_advancer] ?? prediction.predicted_advancer} pasa por penales
             </div>
           )}
         </div>
@@ -249,13 +281,13 @@ export default function PredictionForm({
       >
         {saving
           ? "Guardando..."
-          : existingPrediction
+          : prediction
             ? "Actualizar Pronóstico"
             : "Guardar Pronóstico"}
       </button>
 
       {error && (
-        <p className="text-center text-xs text-red-400" role="alert">
+        <p className="mt-2 text-center text-xs text-red-400" role="alert">
           {error}
         </p>
       )}

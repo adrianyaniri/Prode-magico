@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
 import { TEAM_NAMES_ES } from "@/lib/sync/teams-es";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 type BonusPrediction = {
   top_scorer: string | null;
@@ -22,11 +23,24 @@ export default function BonusPredictionsCard({
   participatingTeams: string[];
 }) {
   const supabase = createClient();
-  const [data, setData] = useState<BonusPrediction>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const queryClient = useQueryClient();
+  const queryKey = ["bonus_predictions", userId] as const;
+
+  const { data, isLoading } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const { data: dbData } = await supabase
+        .from("bonus_predictions")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      return dbData as BonusPrediction;
+    },
+  });
+
   const [showInfo, setShowInfo] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [topScorer, setTopScorer] = useState("");
   const [rev1, setRev1] = useState("");
@@ -35,52 +49,67 @@ export default function BonusPredictionsCard({
   const [dec2, setDec2] = useState("");
 
   const teams = participatingTeams
-    .map(code => ({ code, name: TEAM_NAMES_ES[code] ?? code }))
+    .map((code) => ({ code, name: TEAM_NAMES_ES[code] ?? code }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   useEffect(() => {
-    async function load() {
-      const { data: dbData } = await supabase
-        .from("bonus_predictions")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-      
-      if (dbData) {
-        setData(dbData);
-        setTopScorer(dbData.top_scorer || "");
-        setRev1(dbData.revelation_1 || "");
-        setRev2(dbData.revelation_2 || "");
-        setDec1(dbData.disappointment_1 || "");
-        setDec2(dbData.disappointment_2 || "");
-      }
-      setLoading(false);
+    if (data) {
+      setTopScorer(data.top_scorer || "");
+      setRev1(data.revelation_1 || "");
+      setRev2(data.revelation_2 || "");
+      setDec1(data.disappointment_1 || "");
+      setDec2(data.disappointment_2 || "");
     }
-    load();
-  }, [userId, supabase]);
+  }, [data]);
 
-  async function handleSave() {
-    setSaving(true);
-    setSuccess(false);
-    const { error } = await supabase.from("bonus_predictions").upsert(
-      {
-        user_id: userId,
-        top_scorer: topScorer,
-        revelation_1: rev1,
-        revelation_2: rev2,
-        disappointment_1: dec1,
-        disappointment_2: dec2,
-      },
-      { onConflict: "user_id" }
-    );
-    setSaving(false);
-    if (!error) {
+  const mutation = useMutation({
+    mutationFn: async (newBonus: any) => {
+      if (!navigator.onLine) {
+        throw new Error("No podés guardar sin conexión.");
+      }
+      const { error } = await supabase.from("bonus_predictions").upsert(
+        newBonus,
+        { onConflict: "user_id" }
+      );
+      if (error) throw new Error(error.message);
+    },
+    onMutate: async (newBonus) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData(queryKey);
+      queryClient.setQueryData(queryKey, { ...(previous as any || {}), ...newBonus });
+      return { previous };
+    },
+    onError: (err, newBonus, context) => {
+      setError(err.message);
+      if (context?.previous) {
+        queryClient.setQueryData(queryKey, context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onSuccess: () => {
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    }
+    },
+  });
+
+  function handleSave() {
+    setError(null);
+    setSuccess(false);
+    mutation.mutate({
+      user_id: userId,
+      top_scorer: topScorer,
+      revelation_1: rev1,
+      revelation_2: rev2,
+      disappointment_1: dec1,
+      disappointment_2: dec2,
+    });
   }
 
-  if (loading) return null;
+  const saving = mutation.isPending;
+
+  if (isLoading) return null;
 
   return (
     <div className="mb-6 rounded-xl border border-purple-900/30 bg-purple-900/10 p-4 relative overflow-hidden">

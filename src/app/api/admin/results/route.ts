@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { calculateScore, calculatePenaltyScore } from "@/lib/scoring";
+import { recalculateGroupStandings } from "@/lib/standings";
+import { calculateBestThirdsAndKnockouts } from "@/lib/sync/bracket-calculator";
 
 export async function POST(request: Request) {
   const { matchId, homeScore, awayScore, penaltyWinner } =
@@ -18,7 +20,7 @@ export async function POST(request: Request) {
   // 1. Fetch match info to determine if it's a KO round
   const { data: match, error: matchError } = await supabase
     .from("matches")
-    .select("round")
+    .select("round_name, group_name")
     .eq("id", matchId)
     .single();
 
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const isKnockout = match.round !== "Group";
+  const isKnockout = match.round_name !== "Group Stage";
 
   // 2. Update match result
   const updateFields: Record<string, number | string | null> = {
@@ -51,6 +53,13 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  // Recalculate standings if it's a group match
+  if (match.group_name) {
+    await recalculateGroupStandings(supabase, match.group_name);
+  }
+  // Always try to update knockouts (handles both group and KO cascade)
+  await calculateBestThirdsAndKnockouts(supabase);
 
   // 3. Fetch all predictions for this match
   const { data: predictions, error: fetchError } = await supabase

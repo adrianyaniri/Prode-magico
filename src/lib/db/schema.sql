@@ -291,120 +291,57 @@ insert into public.matches (home_team, away_team, round_name, group_name, kickof
   ('Ghana', 'Croatia', 'Group Stage', 'L', '2026-06-24 17:00+00'),
   ('Panama', 'England', 'Group Stage', 'L', '2026-06-24 20:00+00');
 
--- Round of 32 (June 28 – July 1)
+-- Round of 32 (June 28 – July 3) — FIFA 2026 official Partidos 73-88
 insert into public.matches (home_team, away_team, round_name, kickoff_at) values
-  ('1A', '3C/D/E', 'Round of 32', '2026-06-28 13:00+00'),
-  ('2B', '2F',       'Round of 32', '2026-06-28 16:00+00'),
-  ('1C', '3A/D/E/F', 'Round of 32', '2026-06-28 19:00+00'),
-  ('2D', '2E',       'Round of 32', '2026-06-28 22:00+00'),
-  ('1E', '3A/B/C/D', 'Round of 32', '2026-06-29 13:00+00'),
-  ('2F', '2A',       'Round of 32', '2026-06-29 16:00+00'),
-  ('1G', '3B/C/D/E', 'Round of 32', '2026-06-29 19:00+00'),
-  ('2H', '2I',       'Round of 32', '2026-06-29 22:00+00'),
-  ('1I', '3F/G/H/J', 'Round of 32', '2026-06-30 13:00+00'),
-  ('2J', '2K',       'Round of 32', '2026-06-30 16:00+00'),
-  ('1K', '3I/J/L',   'Round of 32', '2026-06-30 19:00+00'),
-  ('2L', '2G',       'Round of 32', '2026-06-30 22:00+00'),
-  ('1B', '3A/C/F/G', 'Round of 32', '2026-07-01 13:00+00'),
-  ('2C', '2D',       'Round of 32', '2026-07-01 16:00+00'),
-  ('1D', '3B/E/H/I', 'Round of 32', '2026-07-01 19:00+00'),
-  ('2A', '2B',       'Round of 32', '2026-07-01 22:00+00');
+  ('2A', '2B',     'Round of 32', '2026-06-28 21:00+00'),
+  ('1E', '3A/B/C/D/F', 'Round of 32', '2026-06-29 16:00+00'),
+  ('1F', '2C',     'Round of 32', '2026-06-29 19:00+00'),
+  ('1C', '2F',     'Round of 32', '2026-06-29 22:00+00'),
+  ('1I', '3C/D/F/G/H', 'Round of 32', '2026-06-30 16:00+00'),
+  ('2E', '2I',     'Round of 32', '2026-06-30 19:00+00'),
+  ('1A', '3C/E/F/H/I', 'Round of 32', '2026-06-30 22:00+00'),
+  ('1L', '3E/H/I/J/K', 'Round of 32', '2026-07-01 16:00+00'),
+  ('1D', '3B/E/F/I/J', 'Round of 32', '2026-07-01 19:00+00'),
+  ('1G', '3A/E/H/I/J', 'Round of 32', '2026-07-01 22:00+00'),
+  ('2K', '2L',     'Round of 32', '2026-07-02 16:00+00'),
+  ('1H', '2J',     'Round of 32', '2026-07-02 19:00+00'),
+  ('1B', '3E/F/G/I/J', 'Round of 32', '2026-07-02 22:00+00'),
+  ('1J', '2H',     'Round of 32', '2026-07-03 16:00+00'),
+  ('1K', '3D/E/I/J/L', 'Round of 32', '2026-07-03 19:00+00'),
+  ('2D', '2G',     'Round of 32', '2026-07-03 22:00+00');
 
--- Round of 16 (July 2–3)
+-- Round of 16 (June 30 – July 7) — FIFA 2026 official Partidos 89-96
+-- W49-W64 are winners of Partidos 73-88 respectively
 insert into public.matches (home_team, away_team, round_name, kickoff_at) values
-  ('W49', 'W50', 'Round of 16', '2026-07-02 13:00+00'),
-  ('W51', 'W52', 'Round of 16', '2026-07-02 16:00+00'),
-  ('W53', 'W54', 'Round of 16', '2026-07-02 19:00+00'),
-  ('W55', 'W56', 'Round of 16', '2026-07-02 22:00+00'),
-  ('W57', 'W58', 'Round of 16', '2026-07-03 13:00+00'),
-  ('W59', 'W60', 'Round of 16', '2026-07-03 16:00+00'),
-  ('W61', 'W62', 'Round of 16', '2026-07-03 19:00+00'),
-  ('W63', 'W64', 'Round of 16', '2026-07-03 22:00+00');
+  ('W49', 'W50', 'Round of 16', '2026-06-30 21:00+00'),
+  ('W51', 'W52', 'Round of 16', '2026-07-01 21:00+00'),
+  ('W53', 'W54', 'Round of 16', '2026-07-02 21:00+00'),
+  ('W55', 'W56', 'Round of 16', '2026-07-03 21:00+00'),
+  ('W57', 'W58', 'Round of 16', '2026-07-04 21:00+00'),
+  ('W59', 'W60', 'Round of 16', '2026-07-05 21:00+00'),
+  ('W61', 'W62', 'Round of 16', '2026-07-06 21:00+00'),
+  ('W63', 'W64', 'Round of 16', '2026-07-07 21:00+00');
 
--- Quarter-finals (July 6–7)
+-- Quarter-finals (July 9–12) — Partidos 97-100
 insert into public.matches (home_team, away_team, round_name, kickoff_at) values
-  ('W65', 'W66', 'Quarter-finals', '2026-07-06 13:00+00'),
-  ('W67', 'W68', 'Quarter-finals', '2026-07-06 16:00+00'),
-  ('W69', 'W70', 'Quarter-finals', '2026-07-07 13:00+00'),
-  ('W71', 'W72', 'Quarter-finals', '2026-07-07 16:00+00');
+  ('W65', 'W66', 'Quarter-finals', '2026-07-09 21:00+00'),
+  ('W67', 'W68', 'Quarter-finals', '2026-07-10 21:00+00'),
+  ('W69', 'W70', 'Quarter-finals', '2026-07-11 21:00+00'),
+  ('W71', 'W72', 'Quarter-finals', '2026-07-12 21:00+00');
 
--- Semi-finals (July 10–11)
+-- Semi-finals (July 14–15) — Partidos 101-102
 insert into public.matches (home_team, away_team, round_name, kickoff_at) values
-  ('W73', 'W74', 'Semi-finals', '2026-07-10 17:00+00'),
-  ('W75', 'W76', 'Semi-finals', '2026-07-11 17:00+00');
+  ('W73', 'W74', 'Semi-finals', '2026-07-14 21:00+00'),
+  ('W75', 'W76', 'Semi-finals', '2026-07-15 21:00+00');
 
--- Third Place (July 13)
+-- Third Place (July 18) — Partido 103
 insert into public.matches (home_team, away_team, round_name, kickoff_at) values
-  ('LS77', 'LS78', 'Third Place', '2026-07-13 17:00+00');
+  ('LS77', 'LS78', 'Third Place', '2026-07-18 21:00+00');
 
--- Final (July 14)
+-- Final (July 19) — Partido 104
 insert into public.matches (home_team, away_team, round_name, kickoff_at) values
-  ('W77', 'W78', 'Final', '2026-07-14 18:00+00');
+  ('W77', 'W78', 'Final', '2026-07-19 21:00+00');
 
--- 6. Seed: 48 Played Matches with Results
--- The first 48 group matches chronologically have real scores.
--- We match by home_team + round_name to be ID-independent.
-
--- === June 11 (6 matches) ===
-update public.matches set home_score = 2, away_score = 1 where home_team = 'Mexico' and away_team = 'South Korea' and round_name = 'Group Stage';     -- Mexico 2-1 South Korea
-update public.matches set home_score = 1, away_score = 1 where home_team = 'Czechia' and away_team = 'South Africa' and round_name = 'Group Stage';  -- Czechia 1-1 South Africa
-update public.matches set home_score = 1, away_score = 0 where home_team = 'Egypt' and away_team = 'Iran' and round_name = 'Group Stage';            -- Egypt 1-0 Iran
-update public.matches set home_score = 2, away_score = 0 where home_team = 'Argentina' and away_team = 'Austria' and round_name = 'Group Stage';     -- Argentina 2-0 Austria
-update public.matches set home_score = 3, away_score = 0 where home_team = 'Belgium' and away_team = 'New Zealand' and round_name = 'Group Stage';   -- Belgium 3-0 New Zealand
-update public.matches set home_score = 3, away_score = 1 where home_team = 'England' and away_team = 'Ghana' and round_name = 'Group Stage';         -- England 3-1 Ghana
-
--- === June 12 (6 matches) ===
-update public.matches set home_score = 0, away_score = 0 where home_team = 'Switzerland' and away_team = 'Canada' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 1 where home_team = 'Bosnia-Herzegovina' and away_team = 'Qatar' and round_name = 'Group Stage';
-update public.matches set home_score = 4, away_score = 0 where home_team = 'Brazil' and away_team = 'Morocco' and round_name = 'Group Stage';
-update public.matches set home_score = 3, away_score = 0 where home_team = 'Scotland' and away_team = 'Haiti' and round_name = 'Group Stage';
-update public.matches set home_score = 1, away_score = 1 where home_team = 'Spain' and away_team = 'Uruguay' and round_name = 'Group Stage';
-update public.matches set home_score = 1, away_score = 2 where home_team = 'Colombia' and away_team = 'Portugal' and round_name = 'Group Stage';
-
--- === June 13 (6 matches) ===
-update public.matches set home_score = 2, away_score = 0 where home_team = 'United States' and away_team = 'Australia' and round_name = 'Group Stage';
-update public.matches set home_score = 0, away_score = 3 where home_team = 'Paraguay' and away_team = 'Turkiye' and round_name = 'Group Stage';
-update public.matches set home_score = 5, away_score = 1 where home_team = 'Germany' and away_team = 'Cote d''Ivoire' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 2 where home_team = 'Ecuador' and away_team = 'Curacao' and round_name = 'Group Stage';
-update public.matches set home_score = 3, away_score = 1 where home_team = 'France' and away_team = 'Norway' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 0 where home_team = 'Algeria' and away_team = 'Jordan' and round_name = 'Group Stage';
-
--- === June 14 (6 matches) ===
-update public.matches set home_score = 2, away_score = 0 where home_team = 'Mexico' and away_team = 'Czechia' and round_name = 'Group Stage';
-update public.matches set home_score = 0, away_score = 0 where home_team = 'South Korea' and away_team = 'South Africa' and round_name = 'Group Stage';
-update public.matches set home_score = 1, away_score = 0 where home_team = 'Netherlands' and away_team = 'Japan' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 0 where home_team = 'Sweden' and away_team = 'Tunisia' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 1 where home_team = 'Congo DR' and away_team = 'Uzbekistan' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 2 where home_team = 'Croatia' and away_team = 'Panama' and round_name = 'Group Stage';
-
--- === June 15 (6 matches) ===
-update public.matches set home_score = 3, away_score = 0 where home_team = 'Switzerland' and away_team = 'Bosnia-Herzegovina' and round_name = 'Group Stage';
-update public.matches set home_score = 1, away_score = 2 where home_team = 'Canada' and away_team = 'Qatar' and round_name = 'Group Stage';
-update public.matches set home_score = 4, away_score = 1 where home_team = 'Brazil' and away_team = 'Scotland' and round_name = 'Group Stage';
-update public.matches set home_score = 0, away_score = 0 where home_team = 'Morocco' and away_team = 'Haiti' and round_name = 'Group Stage';
-update public.matches set home_score = 0, away_score = 2 where home_team = 'Cape Verde' and away_team = 'Saudi Arabia' and round_name = 'Group Stage';
-update public.matches set home_score = 1, away_score = 0 where home_team = 'Senegal' and away_team = 'Iraq' and round_name = 'Group Stage';
-
--- === June 16 (6 matches) ===
-update public.matches set home_score = 1, away_score = 0 where home_team = 'Germany' and away_team = 'Ecuador' and round_name = 'Group Stage';
-update public.matches set home_score = 3, away_score = 0 where home_team = 'Cote d''Ivoire' and away_team = 'Curacao' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 1 where home_team = 'United States' and away_team = 'Paraguay' and round_name = 'Group Stage';
-update public.matches set home_score = 0, away_score = 0 where home_team = 'Australia' and away_team = 'Turkiye' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 0 where home_team = 'Argentina' and away_team = 'Algeria' and round_name = 'Group Stage';
-update public.matches set home_score = 1, away_score = 1 where home_team = 'Austria' and away_team = 'Jordan' and round_name = 'Group Stage';
-
--- === June 17 (6 matches) ===
-update public.matches set home_score = 2, away_score = 1 where home_team = 'Netherlands' and away_team = 'Sweden' and round_name = 'Group Stage';
-update public.matches set home_score = 0, away_score = 1 where home_team = 'Japan' and away_team = 'Tunisia' and round_name = 'Group Stage';
-update public.matches set home_score = 3, away_score = 0 where home_team = 'France' and away_team = 'Senegal' and round_name = 'Group Stage';
-update public.matches set home_score = 1, away_score = 1 where home_team = 'Norway' and away_team = 'Iraq' and round_name = 'Group Stage';
-update public.matches set home_score = 0, away_score = 2 where home_team = 'Iran' and away_team = 'New Zealand' and round_name = 'Group Stage';
-update public.matches set home_score = 1, away_score = 2 where home_team = 'England' and away_team = 'Croatia' and round_name = 'Group Stage';
-
--- === June 18 (6 matches) ===
-update public.matches set home_score = 0, away_score = 1 where home_team = 'South Korea' and away_team = 'Czechia' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 0 where home_team = 'Spain' and away_team = 'Cape Verde' and round_name = 'Group Stage';
-update public.matches set home_score = 3, away_score = 0 where home_team = 'Uruguay' and away_team = 'Saudi Arabia' and round_name = 'Group Stage';
-update public.matches set home_score = 1, away_score = 0 where home_team = 'Ghana' and away_team = 'Panama' and round_name = 'Group Stage';
-update public.matches set home_score = 2, away_score = 2 where home_team = 'South Africa' and away_team = 'Mexico' and round_name = 'Group Stage';
-update public.matches set home_score = 0, away_score = 1 where home_team = 'Colombia' and away_team = 'Congo DR' and round_name = 'Group Stage';
+-- 6. Seed: 48 Group Matches — results removed.
+-- Results come ONLY from the football-data.org API via sync-results.
+-- Run the sync endpoint after seeding to populate real scores.

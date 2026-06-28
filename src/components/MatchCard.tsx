@@ -4,6 +4,7 @@ import { isBefore, parseISO } from "date-fns";
 import PredictionForm from "./PredictionForm";
 import { TEAM_NAMES_ES } from "@/lib/sync/teams-es";
 import { TEAM_CRESTS } from "@/lib/sync/teams-crests";
+import { esRound } from "@/lib/sync/round-names";
 
 type Match = {
   id: number;
@@ -36,18 +37,7 @@ export default function MatchCard({
 }) {
   const kickoff = parseISO(match.kickoff_at);
   const isPast = isBefore(kickoff, new Date());
-  const roundLabel = (() => {
-    const map: Record<string, string> = {
-      "Group Stage": "Fase de Grupos",
-      "Round of 32": "Ronda de 32",
-      "Round of 16": "Octavos de Final",
-      "Quarter-finals": "Cuartos de Final",
-      "Semi-finals": "Semifinales",
-      "Third Place": "Tercer Puesto",
-      "Final": "Final",
-    };
-    return map[match.round_name] ?? match.round_name;
-  })();
+  const roundLabel = esRound(match.round_name);
   const isGroupStage = match.round_name === "Group Stage";
   const hasResult = match.home_score !== null;
   const canPredict = !isGroupStage && !isPast;

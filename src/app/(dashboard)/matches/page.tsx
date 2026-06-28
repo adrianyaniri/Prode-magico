@@ -133,8 +133,10 @@ export default async function MatchesPage() {
   const standingsData = (standings ?? []) as StandingRow[];
   const standingsByGroup: Record<string, StandingRow[]> = {};
   for (const s of standingsData) {
-    if (!standingsByGroup[s.group_name]) standingsByGroup[s.group_name] = [];
-    standingsByGroup[s.group_name].push(s);
+    // DB stores 'Group A', components expect just 'A'
+    const key = s.group_name.replace(/^Group\s+/i, "");
+    if (!standingsByGroup[key]) standingsByGroup[key] = [];
+    standingsByGroup[key].push(s);
   }
 
   const allMatches = matches ?? [];

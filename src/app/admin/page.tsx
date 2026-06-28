@@ -2,9 +2,26 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import SyncButton from "@/components/SyncButton";
 import RepopulateButton from "@/components/RepopulateButton";
+import { TEAM_NAMES_ES } from "@/lib/sync/teams-es";
+import { esRound } from "@/lib/sync/round-names";
+
+function es(team: string) {
+  return TEAM_NAMES_ES[team] ?? team;
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("es-AR", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default async function AdminOverview() {
   const supabase = createAdminClient();
+
+  const now = new Date().toISOString();
 
   const [
     { count: userCount },
@@ -12,6 +29,8 @@ export default async function AdminOverview() {
     { count: predictionCount },
     { count: inviteCodeCount },
     { count: scoredPredictions },
+    { data: pendingMatches },
+    { count: totalWithResults },
     { data: userRoles },
     { data: authData },
   ] = await Promise.all([
@@ -24,18 +43,26 @@ export default async function AdminOverview() {
       .select("*", { count: "exact", head: true })
       .not("points", "is", null),
     supabase
+      .from("matches")
+      .select("id, home_team, away_team, round_name, group_name, kickoff_at")
+      .lt("kickoff_at", now)
+      .is("home_score", null)
+      .order("kickoff_at", { ascending: true }),
+    supabase
+      .from("matches")
+      .select("*", { count: "exact", head: true })
+      .not("home_score", "is", null),
+    supabase
       .from("user_roles")
       .select("*")
       .order("created_at", { ascending: false }),
     supabase.auth.admin.listUsers(),
   ]);
 
-  // Build email map from auth users
   const emailMap = new Map(
     authData?.users?.map((u) => [u.id, u.email ?? ""]) ?? [],
   );
 
-  // Combine role data with emails
   const users =
     userRoles?.map((ur) => ({
       email: emailMap.get(ur.user_id) ?? "N/A",
@@ -43,12 +70,16 @@ export default async function AdminOverview() {
       created_at: ur.created_at,
     })) ?? [];
 
+  const pendingCount = pendingMatches?.length ?? 0;
+  const pendingCards = pendingMatches?.slice(0, 5) ?? [];
+
   const statsCards = [
     { label: "Usuarios", value: userCount ?? 0 },
     { label: "Partidos", value: matchCount ?? 0 },
     { label: "Pronósticos", value: predictionCount ?? 0 },
     { label: "Códigos de Invitación", value: inviteCodeCount ?? 0 },
     { label: "Pronósticos Puntuados", value: scoredPredictions ?? 0 },
+    { label: "Resultados Cargados", value: totalWithResults ?? 0 },
   ];
 
   return (
@@ -67,6 +98,38 @@ export default async function AdminOverview() {
           </div>
         ))}
       </div>
+
+      {/* Pending matches alert */}
+      {pendingCount > 0 && (
+        <div className="rounded-xl border border-amber-900/40 bg-amber-900/10 p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-medium text-amber-300">
+              {pendingCount} partido{pendingCount !== 1 ? "s" : ""} pendiente{pendingCount !== 1 ? "s" : ""} de resultado
+            </h2>
+            <Link
+              href="/admin/results"
+              className="text-xs font-medium text-amber-400 underline underline-offset-2 hover:text-amber-300"
+            >
+              Cargar resultados
+            </Link>
+          </div>
+          <div className="space-y-1">
+            {pendingCards.map((m) => (
+              <p key={m.id} className="text-xs text-zinc-400">
+                {es(m.home_team)} vs {es(m.away_team)}
+                <span className="ml-1 text-zinc-600">
+                  ({esRound(m.round_name)}{m.group_name ? ` · Grupo ${m.group_name}` : ""} · {formatDate(m.kickoff_at)})
+                </span>
+              </p>
+            ))}
+            {pendingCards.length < pendingCount && (
+              <p className="text-xs text-zinc-600">
+                y {pendingCount - pendingCards.length} más...
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Sync Results */}
       <div className="rounded-xl border border-zinc-800 bg-[#1a1a24] p-4">
@@ -90,6 +153,12 @@ export default async function AdminOverview() {
 
       {/* Quick links */}
       <div className="flex gap-3">
+        <Link
+          href="/admin/results"
+          className="flex h-10 flex-1 items-center justify-center rounded-lg border border-amber-700 text-sm font-medium text-amber-300 transition-colors hover:border-amber-500"
+        >
+          {pendingCount > 0 ? `Cargar Resultados (${pendingCount} pendientes)` : "Cargar Resultados"}
+        </Link>
         <Link
           href="/matches"
           className="flex h-10 flex-1 items-center justify-center rounded-lg border border-zinc-700 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-500"

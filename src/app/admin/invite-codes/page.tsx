@@ -163,35 +163,33 @@ export default function InviteCodesPage() {
             <h3 className="mb-2 text-center text-xl font-black text-black">¡Sumarse al Prode Mágico!</h3>
             <p className="mb-6 text-center text-sm text-zinc-500">Seguí los 2 pasos desde el celular</p>
 
-            <div className="grid grid-cols-2 gap-4">
-              {/* Step 1: Install */}
-              <div className="flex flex-col items-center rounded-2xl border-2 border-blue-200 bg-blue-50 p-4 text-center">
-                <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-sm font-black text-white">1</div>
-                <p className="mb-3 text-sm font-bold text-blue-800">Instalá la app</p>
-                <div className="rounded-xl border-2 border-blue-300 bg-white p-3 inline-block">
-                  <QRCode
-                    value={`${window.location.origin}/install?invite=${selectedCode}`}
-                    size={150}
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                  />
-                </div>
-                <p className="mt-3 text-xs text-blue-600">Escaneá → tocá <strong>"📲 Instalar App"</strong></p>
+            <div className="mx-auto flex max-w-sm flex-col items-center rounded-3xl border-2 border-blue-200 bg-blue-50/50 p-6 text-center shadow-inner">
+              <p className="mb-4 text-sm font-bold text-blue-800">
+                Escaneá para instalar y registrarte
+              </p>
+              
+              <div className="rounded-2xl border-2 border-blue-300 bg-white p-4 shadow-sm">
+                <QRCode
+                  value={`${window.location.origin}/install?invite=${selectedCode}`}
+                  size={200}
+                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                />
               </div>
-
-              {/* Step 2: Register */}
-              <div className="flex flex-col items-center rounded-2xl border-2 border-green-200 bg-green-50 p-4 text-center">
-                <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-sm font-black text-white">2</div>
-                <p className="mb-3 text-sm font-bold text-green-800">Registrate</p>
-                <div className="rounded-xl border-2 border-green-300 bg-white p-3 inline-block">
-                  <QRCode
-                    value={`${window.location.origin}/auth/sign-in?invite=${selectedCode}`}
-                    size={150}
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                  />
-                </div>
-                <p className="mt-2 font-mono text-lg font-black tracking-widest text-green-700">{selectedCode}</p>
-                <p className="text-xs text-green-600">El código ya viene incluido</p>
-              </div>
+              
+              <p className="mt-4 font-mono text-xl font-black tracking-widest text-blue-700">
+                {selectedCode}
+              </p>
+              
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(`${window.location.origin}/install?invite=${selectedCode}`);
+                  alert("¡Link copiado! Pegalo en WhatsApp.");
+                }}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-4 text-sm font-black text-white shadow-lg shadow-[#25D366]/30 transition-all hover:bg-[#1DA851] active:scale-95"
+              >
+                Copiar link para WhatsApp
+              </button>
             </div>
 
             <button

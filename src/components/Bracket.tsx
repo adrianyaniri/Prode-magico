@@ -3,6 +3,7 @@
 import { isBefore, parseISO } from "date-fns";
 import { TEAM_NAMES_ES } from "@/lib/sync/teams-es";
 import { TEAM_CRESTS } from "@/lib/sync/teams-crests";
+import { esRound } from "@/lib/sync/round-names";
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -42,7 +43,7 @@ const KNOCKOUT_ROUNDS = [
 ] as const;
 
 const ROUND_LABELS: Record<string, string> = {
-  "Round of 32": "Ronda de 32",
+  "Round of 32": "16vos",
   "Round of 16": "Octavos",
   "Quarter-finals": "Cuartos",
   "Semi-finals": "Semifinal",

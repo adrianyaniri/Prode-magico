@@ -19,7 +19,7 @@ The app MUST serve a valid `manifest.json` with: app name "Prode WC2026", short 
 
 ### Requirement: Service Worker with Serwist
 
-The app MUST register a Serwist-based service worker at build time. The service worker MUST precache all static assets and enable runtime caching for API routes. It MUST handle navigation requests by serving the offline shell when the network is unavailable.
+The app MUST register a Serwist-based service worker at build time. The service worker MUST precache all static assets. The service worker MUST explicitly exclude RSC payloads and API responses from its caching strategy, deferring data caching to React Query. It MUST handle navigation requests by serving the offline shell when the network is unavailable.
 
 #### Scenario: Service worker registration
 
@@ -27,6 +27,13 @@ The app MUST register a Serwist-based service worker at build time. The service 
 - WHEN the page finishes loading
 - THEN the service worker is registered
 - AND precaching begins for static assets
+
+#### Scenario: RSC payload exclusion
+
+- GIVEN the service worker is active
+- WHEN the app fetches RSC payloads or API data
+- THEN the service worker bypasses these requests without caching them
+- AND React Query handles the caching of the resulting data
 
 #### Scenario: Offline navigation shell
 

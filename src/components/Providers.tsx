@@ -19,6 +19,8 @@ export function useSupabase() {
   return ctx;
 }
 
+import { ReactQueryProvider } from "./ReactQueryProvider";
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
@@ -45,7 +47,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <Context.Provider value={{ supabase, user, loading }}>
-      {children}
+      <ReactQueryProvider>
+        {children}
+      </ReactQueryProvider>
     </Context.Provider>
   );
 }

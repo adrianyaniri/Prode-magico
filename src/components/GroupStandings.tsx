@@ -102,11 +102,20 @@ export default function GroupStandings({
   );
 }
 
+import { useQuery } from "@tanstack/react-query";
+import { getGroupStandings } from "@/app/(dashboard)/matches/actions";
+
 export function GroupStandingsGrid({
-  standingsByGroup,
+  standingsByGroup: initialData,
 }: {
   standingsByGroup: Record<string, Standing[]>;
 }) {
+  const { data: standingsByGroup = {} } = useQuery({
+    queryKey: ["group_standings"],
+    queryFn: async () => await getGroupStandings(),
+    initialData,
+  });
+
   const labels = GROUP_LABELS.filter((l) => standingsByGroup[l]?.length > 0);
 
   if (labels.length === 0) {

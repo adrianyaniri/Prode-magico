@@ -1,20 +1,21 @@
-type LeaderboardEntry = {
-  rank: number;
-  user_id: string;
-  username: string;
-  total_points: number;
-  exact_scores: number;
-  correct_results: number;
-  created_at: string;
-};
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { getLeaderboardEntries, type LeaderboardEntry } from "@/app/(dashboard)/leaderboard/actions";
 
 export default function LeaderboardTable({
-  entries,
+  entries: initialData,
   currentUserId,
 }: {
   entries: LeaderboardEntry[];
   currentUserId: string;
 }) {
+  const { data: entries = [] } = useQuery({
+    queryKey: ["leaderboard"],
+    queryFn: async () => await getLeaderboardEntries(),
+    initialData,
+  });
+
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-12 text-center">
