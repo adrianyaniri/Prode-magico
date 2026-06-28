@@ -135,7 +135,6 @@ export async function calculateBestThirdsAndKnockouts(
   const groupsDone = [..."ABCDEFGHIJKL"].every(
     (g) => all.filter((s) => s.group_name === g && s.played >= 3).length >= 3,
   );
-  if (!groupsDone) return 0;
 
   // Fetch ALL knockout matches ordered by kickoff_at
   const { data: koMatches, error: matchError } = await supabase
