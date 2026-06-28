@@ -306,8 +306,7 @@ export async function POST(request: Request) {
       const { data: predictions, error: predError } = await admin
         .from("predictions")
         .select("id, home_score, away_score")
-        .eq("match_id", dbMatch.id)
-        .is("points", null);
+        .eq("match_id", dbMatch.id);
 
       if (predError) {
         errors.push(

@@ -116,16 +116,18 @@ export default function LeaderboardTable({
                           );
                         }
 
-                        if (isLast) {
+                        if (isZero) {
+                          badges.push(
+                            <span key="zero" className="rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] font-bold text-purple-400 border border-purple-500/30">
+                              Fantasma 👻
+                            </span>
+                          );
+                        } else if (isLast) {
+                          const lastRankCount = entries.filter(e => e.rank === entries[entries.length - 1].rank).length;
+                          // Solo darle "Hijo de todos" si es el ÚNICO último, o si queremos dárselo a todos los últimos (lo dejamos para todos los que compartan el último puesto)
                           badges.push(
                             <span key="last" className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold text-red-400 border border-red-500/30">
                               Hijo de todos 🍼
-                            </span>
-                          );
-                        } else if (isZero) {
-                          badges.push(
-                            <span key="zero" className="rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] font-bold text-purple-400 border border-purple-500/30">
-                              Zapatero 👞
                             </span>
                           );
                         }

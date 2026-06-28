@@ -16,11 +16,13 @@ export type LeaderboardEntry = {
 export async function getLeaderboardEntries(): Promise<LeaderboardEntry[]> {
   const supabase = await createClient();
 
-  const { data: scores } = await supabase
+  const adminSupabase = createAdminClient();
+
+  const { data: scores } = await adminSupabase
     .from("predictions")
     .select("user_id, points, match_id");
 
-  const { data: bonusScores } = await supabase
+  const { data: bonusScores } = await adminSupabase
     .from("bonus_predictions")
     .select("user_id, points");
 
@@ -28,7 +30,6 @@ export async function getLeaderboardEntries(): Promise<LeaderboardEntry[]> {
     .from("user_roles")
     .select("user_id, role, created_at");
 
-  const adminSupabase = createAdminClient();
   const { data: authUsers } = await adminSupabase.auth.admin.listUsers();
   const userEmailMap = new Map(
     authUsers?.users?.map((u) => [
@@ -96,12 +97,10 @@ export async function getLeaderboardEntries(): Promise<LeaderboardEntry[]> {
       const isTied =
         entry.total_points === prev.total_points &&
         entry.exact_scores === prev.exact_scores &&
-        entry.correct_results === prev.correct_results &&
-        new Date(entry.created_at).getTime() ===
-          new Date(prev.created_at).getTime();
+        entry.correct_results === prev.correct_results;
       return [
         ...acc,
-        { ...entry, rank: isTied ? acc[acc.length - 1].rank : i + 1 },
+        { ...entry, rank: isTied ? acc[acc.length - 1].rank : acc[acc.length - 1].rank + 1 },
       ];
     },
     [] as LeaderboardEntry[],
