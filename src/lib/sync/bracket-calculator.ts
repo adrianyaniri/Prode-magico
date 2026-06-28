@@ -137,41 +137,109 @@ export async function calculateBestThirdsAndKnockouts(
   );
   if (!groupsDone) return 0;
 
-  // Fetch R32 matches ordered by kickoff_at (must match FIFA chronological order)
-  const { data: ro32, error: matchError } = await supabase
+  // Fetch ALL knockout matches ordered by kickoff_at
+  const { data: koMatches, error: matchError } = await supabase
     .from("matches")
-    .select("id, home_team, away_team")
-    .eq("round_name", "Round of 32")
+    .select("*")
+    .neq("round_name", "Group Stage")
     .order("kickoff_at", { ascending: true });
 
-  if (matchError || !ro32 || ro32.length < 16) {
-    console.error("Not enough R32 matches found");
+  if (matchError || !koMatches) {
+    console.error("Failed to fetch knockout matches");
     return 0;
   }
 
+  const r32 = koMatches.filter(m => m.round_name === "Round of 32");
+  const r16 = koMatches.filter(m => m.round_name === "Round of 16");
+  const qf = koMatches.filter(m => m.round_name === "Quarter-finals");
+  const sf = koMatches.filter(m => m.round_name === "Semi-finals");
+  const tp = koMatches.filter(m => m.round_name === "Third Place");
+  const fn = koMatches.filter(m => m.round_name === "Final");
+
   let updates = 0;
 
-  for (let i = 0; i < 16; i++) {
-    const dbMatch = ro32[i];
-    const pair = R32_PAIRS[i];
-
-    const homeTeam = pair.home(all);
-    const awayTeam = pair.away(all);
-    if (!homeTeam || !awayTeam) continue;
-
-    if (
-      isPlaceholder(dbMatch.home_team) ||
-      isPlaceholder(dbMatch.away_team) ||
-      dbMatch.home_team !== homeTeam ||
-      dbMatch.away_team !== awayTeam
-    ) {
+  async function updateMatchIfNeeded(match: any, newHome: string | null, newAway: string | null) {
+    const finalHome = newHome || match.home_team;
+    const finalAway = newAway || match.away_team;
+    
+    if (finalHome !== match.home_team || finalAway !== match.away_team) {
       const { error: err } = await supabase
         .from("matches")
-        .update({ home_team: homeTeam, away_team: awayTeam })
-        .eq("id", dbMatch.id);
-      if (!err) updates++;
+        .update({ home_team: finalHome, away_team: finalAway })
+        .eq("id", match.id);
+      if (!err) {
+        updates++;
+        match.home_team = finalHome;
+        match.away_team = finalAway;
+      }
+    }
+  }
+
+  // 1. Resolve R32 from Group Standings
+  if (r32.length === 16 && groupsDone) {
+    for (let i = 0; i < 16; i++) {
+      const pair = R32_PAIRS[i];
+      await updateMatchIfNeeded(r32[i], pair.home(all), pair.away(all));
+    }
+  }
+
+  function getWinner(match: any): string | null {
+    if (match.home_score === null || match.away_score === null) return null;
+    if (match.home_score > match.away_score) return match.home_team;
+    if (match.away_score > match.home_score) return match.away_team;
+    if (match.penalty_winner) return match.penalty_winner;
+    return null;
+  }
+
+  function getLoser(match: any): string | null {
+    if (match.home_score === null || match.away_score === null) return null;
+    if (match.home_score > match.away_score) return match.away_team;
+    if (match.away_score > match.home_score) return match.home_team;
+    if (match.penalty_winner) return match.penalty_winner === match.home_team ? match.away_team : match.home_team;
+    return null;
+  }
+
+  // 2. Cascade R32 -> R16
+  if (r32.length === 16 && r16.length === 8) {
+    for (let i = 0; i < 8; i++) {
+      const w1 = getWinner(r32[i * 2]);
+      const w2 = getWinner(r32[i * 2 + 1]);
+      await updateMatchIfNeeded(r16[i], w1, w2);
+    }
+  }
+
+  // 3. Cascade R16 -> QF
+  if (r16.length === 8 && qf.length === 4) {
+    for (let i = 0; i < 4; i++) {
+      const w1 = getWinner(r16[i * 2]);
+      const w2 = getWinner(r16[i * 2 + 1]);
+      await updateMatchIfNeeded(qf[i], w1, w2);
+    }
+  }
+
+  // 4. Cascade QF -> SF
+  if (qf.length === 4 && sf.length === 2) {
+    for (let i = 0; i < 2; i++) {
+      const w1 = getWinner(qf[i * 2]);
+      const w2 = getWinner(qf[i * 2 + 1]);
+      await updateMatchIfNeeded(sf[i], w1, w2);
+    }
+  }
+
+  // 5. Cascade SF -> Third Place & Final
+  if (sf.length === 2) {
+    if (tp.length === 1) {
+      const l1 = getLoser(sf[0]);
+      const l2 = getLoser(sf[1]);
+      await updateMatchIfNeeded(tp[0], l1, l2);
+    }
+    if (fn.length === 1) {
+      const w1 = getWinner(sf[0]);
+      const w2 = getWinner(sf[1]);
+      await updateMatchIfNeeded(fn[0], w1, w2);
     }
   }
 
   return updates;
 }
+
