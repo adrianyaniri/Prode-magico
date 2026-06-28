@@ -17,9 +17,8 @@ export default function MatchesTabs({
   eliminatoriasNode: React.ReactNode;
   hasStandings: boolean;
 }) {
-  const [activeView, setActiveView] = useState<
-    "posiciones" | "terceros" | "goleadores" | "grupos" | "eliminatorias" | null
-  >(null);
+  type ViewType = "posiciones" | "terceros" | "goleadores" | "grupos" | "eliminatorias";
+  const [activeView, setActiveView] = useState<ViewType | null>(null);
 
   const cards = [
     { id: "grupos", label: "Fase de Grupos", icon: "🏆", desc: "Todos los partidos de la primera fase" },
@@ -74,7 +73,7 @@ export default function MatchesTabs({
       {cards.map((card) => (
         <button
           key={card.id}
-          onClick={() => setActiveView(card.id as typeof activeView)}
+          onClick={() => setActiveView(card.id as ViewType)}
           className="group flex flex-col items-center justify-center gap-3 rounded-2xl border border-zinc-800 bg-[#1a1a24] p-8 text-center transition-all hover:-translate-y-1 hover:border-zinc-700 hover:bg-zinc-800/50 hover:shadow-xl hover:shadow-blue-900/10 active:scale-95"
         >
           <span className="text-5xl transition-transform duration-300 group-hover:scale-110">
