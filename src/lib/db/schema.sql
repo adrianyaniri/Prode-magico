@@ -53,6 +53,18 @@ create table if not exists public.user_roles (
   created_at timestamptz default now()
 );
 
+create table if not exists public.shoutbox (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  message text not null check (char_length(message) > 0 and char_length(message) <= 150),
+  created_at timestamptz default now()
+);
+
+-- RLS for shoutbox
+alter table public.shoutbox enable row level security;
+create policy "Anyone can read shoutbox messages" on public.shoutbox for select using (true);
+create policy "Authenticated users can insert shoutbox messages" on public.shoutbox for insert with check (auth.uid() = user_id);
+
 -- 1.5. RPC Functions
 
 -- Increment invite code usage count (called after successful registration)

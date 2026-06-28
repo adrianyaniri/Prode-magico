@@ -254,14 +254,16 @@ export default function PredictionForm({
         <div className="flex items-center gap-3">
           <button
             onClick={handleDecrementHome}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white transition-colors hover:bg-zinc-700 active:bg-zinc-600"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white transition-all hover:bg-zinc-700 active:scale-90 active:bg-zinc-600"
           >
             -
           </button>
-          <span className="w-6 text-center text-2xl font-bold text-white">{homeScore}</span>
+          <div key={`home-${homeScore}`} className="w-10 text-center text-3xl font-black text-white animate-pop">
+            {homeScore}
+          </div>
           <button
             onClick={handleIncrementHome}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white transition-colors hover:bg-zinc-700 active:bg-zinc-600"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white transition-all hover:bg-zinc-700 active:scale-90 active:bg-zinc-600"
           >
             +
           </button>
@@ -281,14 +283,16 @@ export default function PredictionForm({
         <div className="flex items-center gap-3">
           <button
             onClick={handleDecrementAway}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white transition-colors hover:bg-zinc-700 active:bg-zinc-600"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white transition-all hover:bg-zinc-700 active:scale-90 active:bg-zinc-600"
           >
             -
           </button>
-          <span className="w-6 text-center text-2xl font-bold text-white">{awayScore}</span>
+          <div key={`away-${awayScore}`} className="w-10 text-center text-3xl font-black text-white animate-pop">
+            {awayScore}
+          </div>
           <button
             onClick={handleIncrementAway}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white transition-colors hover:bg-zinc-700 active:bg-zinc-600"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-2xl font-bold text-white transition-all hover:bg-zinc-700 active:scale-90 active:bg-zinc-600"
           >
             +
           </button>

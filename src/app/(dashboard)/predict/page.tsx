@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import MatchCard from "@/components/MatchCard";
 import BonusPredictionsCard from "@/components/BonusPredictionsCard";
+import CountdownBanner from "@/components/CountdownBanner";
 import { isBefore, parseISO } from "date-fns";
 import Link from "next/link";
 
@@ -63,6 +64,11 @@ export default async function PredictPage() {
 
   const hasMatches = Object.keys(matchesByRound).length > 0;
 
+  // Find the next upcoming match
+  const nextMatch = allMatches
+    .filter((m) => isBefore(now, parseISO(m.kickoff_at)))
+    .sort((a, b) => parseISO(a.kickoff_at).getTime() - parseISO(b.kickoff_at).getTime())[0];
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -71,6 +77,8 @@ export default async function PredictPage() {
           Cargá o modificá tus pronósticos para los próximos partidos.
         </p>
       </div>
+
+      {nextMatch && <CountdownBanner targetDateStr={nextMatch.kickoff_at} />}
 
       <BonusPredictionsCard 
         userId={user.id} 

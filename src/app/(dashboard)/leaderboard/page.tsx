@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import LeaderboardTable from "@/components/LeaderboardTable";
+import Shoutbox from "@/components/Shoutbox";
 import { getLeaderboardEntries } from "./actions";
 
 export default async function LeaderboardPage() {
@@ -14,6 +15,7 @@ export default async function LeaderboardPage() {
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-bold text-white">Tabla de Posiciones</h1>
       <LeaderboardTable entries={entries} currentUserId={user!.id} />
+      <Shoutbox />
     </div>
   );
 }
