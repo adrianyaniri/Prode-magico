@@ -86,16 +86,52 @@ export default function LeaderboardTable({
                           Vos
                         </span>
                       )}
-                      {entry.rank === 1 && entry.total_points > 0 && (
-                        <span className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] font-bold text-yellow-500 border border-yellow-500/30">
-                          Nostradamus 👑
-                        </span>
-                      )}
-                      {entry.rank > 1 && entry.rank === entries[entries.length - 1].rank && entries.length > 2 && entry.total_points < entries[0].total_points && (
-                        <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold text-red-400 border border-red-500/30">
-                          Hijo de todos 🍼
-                        </span>
-                      )}
+                      
+                      {/* BROMAS Y MEDALLAS ARGENTAS */}
+                      {(() => {
+                        const badges = [];
+                        const isFirst = entry.rank === 1 && entry.total_points > 0;
+                        const isSecond = entry.rank === 2 && entry.total_points > 0;
+                        const isLast = entry.rank > 1 && entry.rank === entries[entries.length - 1].rank && entries.length > 2 && entry.total_points < entries[0].total_points;
+                        const isZero = entry.total_points === 0 && entries[0].total_points > 0;
+                        const isNearTop = entry.rank === 2 && entries[0].total_points - entry.total_points === 1;
+
+                        if (isFirst) {
+                          badges.push(
+                            <span key="first" className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] font-bold text-yellow-500 border border-yellow-500/30">
+                              Nostradamus 👑
+                            </span>
+                          );
+                        } else if (isNearTop) {
+                          badges.push(
+                            <span key="near-top" className="rounded bg-orange-500/20 px-1.5 py-0.5 text-[10px] font-bold text-orange-400 border border-orange-500/30" title="A un puntito del líder">
+                              Soplándole la nuca 🌬️
+                            </span>
+                          );
+                        } else if (isSecond) {
+                          badges.push(
+                            <span key="second" className="rounded bg-zinc-400/20 px-1.5 py-0.5 text-[10px] font-bold text-zinc-300 border border-zinc-400/30">
+                              Cebollita 🧅
+                            </span>
+                          );
+                        }
+
+                        if (isLast) {
+                          badges.push(
+                            <span key="last" className="rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] font-bold text-red-400 border border-red-500/30">
+                              Hijo de todos 🍼
+                            </span>
+                          );
+                        } else if (isZero) {
+                          badges.push(
+                            <span key="zero" className="rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] font-bold text-purple-400 border border-purple-500/30">
+                              Zapatero 👞
+                            </span>
+                          );
+                        }
+
+                        return badges;
+                      })()}
                     </div>
                   </div>
                 </td>

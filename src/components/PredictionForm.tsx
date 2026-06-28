@@ -97,19 +97,79 @@ export default function PredictionForm({
       queryClient.invalidateQueries({ queryKey });
     },
     onSuccess: () => {
-      const phrases = [
-        "Guardado. Si le pegás, pago el asado. 🥩",
-        "Guardado. Que Dios y la Patria te lo demanden. 🇦🇷",
-        "Guardado. Anulo mufa 🤞",
-        "Guardado. Se nota que sabés de fútbol. ⚽",
-        "Guardado. Alta fe le tenés. 🙏",
-      ];
-      setSuccessMsg(phrases[Math.floor(Math.random() * phrases.length)]);
+      const totalGoals = homeScore + awayScore;
+      const goalDiff = Math.abs(homeScore - awayScore);
+      let jokeMsg = null;
+
+      if (homeScore === 0 && awayScore === 0) {
+        jokeMsg = isKnockout 
+          ? "🛡️ Catenaccio puro y a cortar clavos con el culo en los penales." 
+          : "😴 0 a 0 clavadísimo. Un dolor de ojos digno del ascenso.";
+      } else if (homeScore === 7 && awayScore === 1) {
+        jokeMsg = "🇧🇷 ¿Siete a uno? Decime cómo se siente... Guardado.";
+      } else if (goalDiff >= 4) {
+        jokeMsg = "🚑 ¡Llamen al SAME que lo sacan en camilla! Baile total.";
+      } else if (totalGoals >= 6) {
+        jokeMsg = "🚬 ¡Fútbol champagne y fulbito del bueno! Guardado.";
+      } else if (homeScore === awayScore && homeScore > 0) {
+        jokeMsg = isKnockout
+          ? "🚑 Partido no apto para cardíacos. Directo a la ruleta de los penales."
+          : "🤝 Se conformaron con el puntito inteligente. Guardado.";
+      } else if (totalGoals === 1) {
+        jokeMsg = "🤏 Un medio a cero a lo Bilardo. Arafue el tiki-tiki.";
+      }
+
+      if (!jokeMsg) {
+        const phrases = [
+          "Guardado. Si le pegás, hoy pago el asado yo. 🥩",
+          "Anotado. Ni el pulpo Paul se animó a tanto. 🐙",
+          "Guardado. Anulo mufa por las dudas. 🤞",
+          "Guardado. Scaloni estaría orgulloso de este pronóstico. 🧢",
+          "Guardado. Si sale esto, sos el Nostradamus del Conurbano. 🔮",
+        ];
+        jokeMsg = phrases[Math.floor(Math.random() * phrases.length)];
+      }
+
+      setSuccessMsg(jokeMsg);
       setSuccess(true);
     },
   });
 
-  if (isPast) return null;
+  if (isPast) {
+    if (!prediction) {
+      return (
+        <div className="mt-3 rounded-xl border border-red-900/30 bg-red-900/10 p-3 text-center">
+          <p className="text-xs font-medium text-red-400">El partido ya empezó y no llegaste a cargar pronóstico. 😢</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-center">
+        <div className="mb-3 flex items-center justify-center gap-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+            🔒 Tu pronóstico (Bloqueado)
+          </span>
+        </div>
+        
+        <div className="flex flex-col gap-2 opacity-80">
+          <div className="flex items-center justify-between px-4">
+            <span className="text-sm font-medium text-white">{TEAM_NAMES_ES[homeTeam] ?? homeTeam}</span>
+            <span className="text-xl font-bold text-white">{prediction.home_score}</span>
+          </div>
+          <div className="flex items-center justify-between px-4">
+            <span className="text-sm font-medium text-white">{TEAM_NAMES_ES[awayTeam] ?? awayTeam}</span>
+            <span className="text-xl font-bold text-white">{prediction.away_score}</span>
+          </div>
+          {prediction.predicted_advancer && (
+            <div className="mt-2 text-center text-[10px] font-medium text-zinc-400 uppercase tracking-wider">
+              {TEAM_NAMES_ES[prediction.predicted_advancer] ?? prediction.predicted_advancer} pasa por penales
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   function handleIncrementHome() {
     setHomeScore((prev) => Math.min(prev + 1, 20));
@@ -263,13 +323,6 @@ export default function PredictionForm({
               {TEAM_NAMES_ES[awayTeam] ?? awayTeam}
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Mensaje Empate 0-0 */}
-      {homeScore === 0 && awayScore === 0 && !isKnockout && (
-        <div className="mt-1 mb-1 text-center text-[11px] font-medium italic text-zinc-500">
-          😴 Partido ideal para dormir la siesta
         </div>
       )}
 

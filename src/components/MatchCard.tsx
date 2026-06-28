@@ -120,7 +120,7 @@ export default function MatchCard({
           </div>
 
           {/* Tu pronóstico */}
-          {hasResult && prediction && (
+          {(hasResult || isLocked) && prediction && (
             <div className="mt-2 flex items-center justify-between rounded-lg border border-zinc-700/50 bg-zinc-800/30 px-3 py-2">
               <span className="text-xs font-medium text-zinc-400">Tu pronóstico:</span>
               <div className="flex items-center gap-2">
@@ -132,7 +132,18 @@ export default function MatchCard({
                     +{prediction.points} pts
                   </span>
                 )}
+                {isLocked && prediction.points === null && (
+                  <span className="text-[10px] uppercase tracking-wider text-yellow-500 font-bold ml-1" title="Partido en juego - Pronóstico bloqueado">
+                    🔒
+                  </span>
+                )}
               </div>
+            </div>
+          )}
+
+          {(hasResult || isLocked) && !prediction && (
+            <div className="mt-2 text-center rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-3 py-2">
+              <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Sin pronóstico</span>
             </div>
           )}
 

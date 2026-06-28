@@ -40,11 +40,9 @@ export default async function PredictPage() {
   const allMatches = matches ?? [];
   const now = new Date();
 
-  // Only keep matches that haven't started yet and are not group stage (or are group stage if we want)
-  // The user says the group stage is past anyway, so we just filter by isBefore.
+  // Solo filtramos los de fase de grupos, porque queremos ver el historial de nuestras predicciones en eliminatorias
   const upcomingMatches = allMatches.filter((m) => {
-    const kickoff = parseISO(m.kickoff_at);
-    return !isBefore(kickoff, now) && m.round_name !== "Group Stage";
+    return m.round_name !== "Group Stage";
   });
 
   const knockoutStarted = allMatches.some((m) => {
