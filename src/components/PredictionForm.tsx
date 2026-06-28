@@ -215,11 +215,17 @@ export default function PredictionForm({
         
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between px-4">
-            <span className="text-sm font-medium text-white">{TEAM_NAMES_ES[homeTeam] ?? homeTeam}</span>
+            <span className="flex items-center gap-2 text-sm font-bold text-white">
+              {TEAM_NAMES_ES[homeTeam] ?? homeTeam}
+              {TEAM_CRESTS[homeTeam] && <img src={TEAM_CRESTS[homeTeam]} alt="" className="h-4 w-4 object-contain" />}
+            </span>
             <span className="text-xl font-bold text-white">{homeScore}</span>
           </div>
           <div className="flex items-center justify-between px-4">
-            <span className="text-sm font-medium text-white">{TEAM_NAMES_ES[awayTeam] ?? awayTeam}</span>
+            <span className="flex items-center gap-2 text-sm font-bold text-white">
+              {TEAM_CRESTS[awayTeam] && <img src={TEAM_CRESTS[awayTeam]} alt="" className="h-4 w-4 object-contain" />}
+              {TEAM_NAMES_ES[awayTeam] ?? awayTeam}
+            </span>
             <span className="text-xl font-bold text-white">{awayScore}</span>
           </div>
           {prediction?.predicted_advancer && (
@@ -244,10 +250,8 @@ export default function PredictionForm({
       {/* Fila Local */}
       <div className="flex items-center justify-between rounded-lg bg-zinc-800/30 p-2">
         <div className="flex items-center gap-3">
-          {TEAM_CRESTS[homeTeam] && (
-            <img src={TEAM_CRESTS[homeTeam]} alt={homeTeam} className="h-8 w-8 object-contain" />
-          )}
-          <span className="text-base font-bold text-white">
+          <span className="flex items-center gap-2 font-bold text-white">
+            {TEAM_CRESTS[homeTeam] && <img src={TEAM_CRESTS[homeTeam]} alt="" className="h-5 w-5 object-contain" />}
             {TEAM_NAMES_ES[homeTeam] ?? homeTeam}
           </span>
         </div>
@@ -273,11 +277,9 @@ export default function PredictionForm({
       {/* Fila Visitante */}
       <div className="flex items-center justify-between rounded-lg bg-zinc-800/30 p-2">
         <div className="flex items-center gap-3">
-          {TEAM_CRESTS[awayTeam] && (
-            <img src={TEAM_CRESTS[awayTeam]} alt={awayTeam} className="h-8 w-8 object-contain" />
-          )}
-          <span className="text-base font-bold text-white">
+          <span className="flex items-center gap-2 font-bold text-white">
             {TEAM_NAMES_ES[awayTeam] ?? awayTeam}
+            {TEAM_CRESTS[awayTeam] && <img src={TEAM_CRESTS[awayTeam]} alt="" className="h-5 w-5 object-contain" />}
           </span>
         </div>
         <div className="flex items-center gap-3">

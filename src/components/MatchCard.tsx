@@ -92,11 +92,9 @@ export default function MatchCard({
           {/* Fila Local */}
           <div className="flex items-center justify-between rounded-lg bg-zinc-800/20 p-2">
             <div className="flex items-center gap-3">
-              {TEAM_CRESTS[match.home_team] && (
-                <img src={TEAM_CRESTS[match.home_team]} alt={match.home_team} className="h-6 w-6 object-contain" />
-              )}
-              <span className="text-sm font-bold text-white">
+              <span className="flex items-center justify-end gap-2 text-sm font-bold text-white">
                 {TEAM_NAMES_ES[match.home_team] ?? match.home_team}
+                {TEAM_CRESTS[match.home_team] && <img src={TEAM_CRESTS[match.home_team]} alt="" className="h-4 w-4 object-contain" />}
               </span>
             </div>
             {hasResult && (
@@ -107,10 +105,8 @@ export default function MatchCard({
           {/* Fila Visitante */}
           <div className="flex items-center justify-between rounded-lg bg-zinc-800/20 p-2">
             <div className="flex items-center gap-3">
-              {TEAM_CRESTS[match.away_team] && (
-                <img src={TEAM_CRESTS[match.away_team]} alt={match.away_team} className="h-6 w-6 object-contain" />
-              )}
-              <span className="text-sm font-bold text-white">
+              <span className="flex items-center gap-2 text-sm font-bold text-white">
+                {TEAM_CRESTS[match.away_team] && <img src={TEAM_CRESTS[match.away_team]} alt="" className="h-4 w-4 object-contain" />}
                 {TEAM_NAMES_ES[match.away_team] ?? match.away_team}
               </span>
             </div>

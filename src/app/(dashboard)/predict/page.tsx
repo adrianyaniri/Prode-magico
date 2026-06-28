@@ -4,6 +4,7 @@ import BonusPredictionsCard from "@/components/BonusPredictionsCard";
 import CountdownBanner from "@/components/CountdownBanner";
 import { isBefore, parseISO } from "date-fns";
 import Link from "next/link";
+import MatchesFilter from "@/components/MatchesFilter";
 
 const KNOCKOUT_ROUNDS = [
   "Round of 32",
@@ -103,28 +104,12 @@ export default async function PredictPage() {
         </div>
       )}
 
-      {KNOCKOUT_ROUNDS.map((round) => {
-        const matches = matchesByRound[round];
-        if (!matches?.length) return null;
-        return (
-          <div key={round} className="mb-2">
-            <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">
-              {round}
-            </h3>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {matches.map((match) => (
-                <MatchCard
-                  key={match.id}
-                  match={match}
-                  prediction={predictionsMap.get(match.id) ?? null}
-                  userId={user.id}
-                  hidePrediction={false}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })}
+      <MatchesFilter 
+        matches={upcomingMatches}
+        predictions={predictionsData ?? []}
+        userId={user.id}
+        rounds={KNOCKOUT_ROUNDS}
+      />
     </div>
   );
 }

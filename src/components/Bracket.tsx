@@ -114,40 +114,40 @@ function BracketMatchCard({
 
   return (
     <div
-      className={`flex w-full flex-col justify-center rounded-md border px-2.5 py-1 ${
+      className={`group/card relative flex w-full flex-col justify-center rounded-lg border px-3 py-1.5 transition-all hover:-translate-y-[1px] hover:shadow-lg ${
         hasScore
-          ? "border-zinc-700 bg-[#1a1a24]"
+          ? "border-zinc-700 bg-gradient-to-br from-[#1a1a24] to-zinc-900 shadow-sm hover:border-blue-500/50"
           : isPast
-            ? "border-zinc-800/60 bg-zinc-900/40"
-            : "border-zinc-700/60 bg-[#1a1a24]/80"
+            ? "border-zinc-800/50 bg-zinc-900/30"
+            : "border-zinc-700/60 bg-[#1a1a24]/60 hover:border-zinc-600 hover:bg-[#1a1a24]"
       }`}
       style={{ height: CARD_H }}
     >
       {/* Home team + score */}
-      <div className="flex items-center justify-between gap-1">
-        <span className="truncate text-[13px] font-medium leading-tight text-white flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className={`truncate text-[13px] leading-tight flex items-center gap-2 ${hasScore && match.home_score! > match.away_score! ? "font-bold text-white" : "font-medium text-zinc-300"}`}>
           {homeFlag && <img src={homeFlag} alt="" className="h-3.5 w-3.5 object-contain" />}
           {homeName}
         </span>
         {hasScore && (
-          <span className="shrink-0 text-[13px] font-bold tabular-nums text-white">
+          <span className={`shrink-0 text-[13px] tabular-nums ${match.home_score! > match.away_score! ? "font-bold text-white" : "font-medium text-zinc-400"}`}>
             {match.home_score}
           </span>
         )}
       </div>
 
       {/* Away team + score / vs */}
-      <div className="mt-px flex items-center justify-between gap-1">
-        <span className="truncate text-[13px] font-medium leading-tight text-white flex items-center gap-1.5">
+      <div className="mt-1 flex items-center justify-between gap-2">
+        <span className={`truncate text-[13px] leading-tight flex items-center gap-2 ${hasScore && match.away_score! > match.home_score! ? "font-bold text-white" : "font-medium text-zinc-300"}`}>
           {awayFlag && <img src={awayFlag} alt="" className="h-3.5 w-3.5 object-contain" />}
           {awayName}
         </span>
         {hasScore ? (
-          <span className="shrink-0 text-[13px] font-bold tabular-nums text-white">
+          <span className={`shrink-0 text-[13px] tabular-nums ${match.away_score! > match.home_score! ? "font-bold text-white" : "font-medium text-zinc-400"}`}>
             {match.away_score}
           </span>
         ) : (
-          <span className="shrink-0 text-[11px] font-medium text-zinc-500">
+          <span className="shrink-0 text-[11px] font-medium text-zinc-600">
             {isPast ? "-" : "vs"}
           </span>
         )}
@@ -206,39 +206,25 @@ function ConnectorColumn({
 
           return (
             <g key={i}>
-              <line
-                x1={leftX}
-                y1={pair.s1}
-                x2={midX}
-                y2={pair.s1}
-                stroke="#3f3f46"
+              <path
+                d={`M ${leftX} ${pair.s1} H ${midX} V ${pair.s2} H ${leftX}`}
+                fill="none"
+                stroke="#52525b"
                 strokeWidth={1.5}
-              />
-              <line
-                x1={leftX}
-                y1={pair.s2}
-                x2={midX}
-                y2={pair.s2}
-                stroke="#3f3f46"
-                strokeWidth={1.5}
-              />
-              <line
-                x1={midX}
-                y1={pair.s1}
-                x2={midX}
-                y2={pair.s2}
-                stroke="#3f3f46"
-                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="transition-colors duration-300"
               />
               <line
                 x1={midX}
                 y1={pair.t}
                 x2={rightX}
                 y2={pair.t}
-                stroke="#3f3f46"
+                stroke="#52525b"
                 strokeWidth={1.5}
+                strokeLinecap="round"
               />
-              <circle cx={rightX} cy={pair.t} r={2} fill="#3f3f46" />
+              <circle cx={rightX} cy={pair.t} r={2.5} fill="#71717a" className="transition-all duration-300" />
             </g>
           );
         })}
@@ -478,8 +464,8 @@ export default function Bracket({
   const showRightConns = nonEmptyConns(rightConns);
 
   return (
-    <div className="overflow-x-auto w-full pb-4">
-      <div className="inline-flex px-2" style={{ gap: 0 }}>
+    <div className="overflow-x-auto w-full pb-4 custom-scrollbar">
+      <div className="flex w-max min-w-full justify-center px-2" style={{ gap: 0 }}>
         {/* ── LEFT SIDE ── */}
         {leftRounds.map((r, i) => (
           <div key={`left-${r.roundName}`} className="flex">
