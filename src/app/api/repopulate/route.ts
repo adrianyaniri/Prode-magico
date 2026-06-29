@@ -137,7 +137,7 @@ export async function POST(request: Request) {
     // We no longer wipe matches with delete() because it triggers ON DELETE CASCADE 
     // on the predictions table, deleting all user predictions.
     // Instead, we just upsert to update teams/scores natively without deleting the UUIDs.
-    const { error: matchesError } = await adminClient.from("matches").upsert(dbMatches, { onConflict: "api_id" });
+    const { error: matchesError } = await adminClient.from("matches").upsert(dbMatches, { onConflict: "api_id", ignoreDuplicates: false });
     if (matchesError) throw matchesError;
 
     // Process Standings
