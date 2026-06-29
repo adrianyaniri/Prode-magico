@@ -174,13 +174,14 @@ export async function calculateBestThirdsAndKnockouts(
     }
   }
 
-  // 1. Resolve R32 from Group Standings
-  if (r32.length === 16 && groupsDone) {
-    for (let i = 0; i < 16; i++) {
-      const pair = R32_PAIRS[i];
-      await updateMatchIfNeeded(r32[i], pair.home(all), pair.away(all));
-    }
-  }
+  // 1. Resolve R32 from Group Standings (Disabled)
+  // R32 is handled natively by the API. We do not override it with an incomplete R32_PAIRS mapping.
+  // if (r32.length === 16 && groupsDone) {
+  //   for (let i = 0; i < 16; i++) {
+  //     const pair = R32_PAIRS[i];
+  //     await updateMatchIfNeeded(r32[i], pair.home(all), pair.away(all));
+  //   }
+  // }
 
   function getWinner(match: any): string | null {
     if (match.home_score === null || match.away_score === null) return null;
@@ -200,27 +201,36 @@ export async function calculateBestThirdsAndKnockouts(
 
   // 2. Cascade R32 -> R16
   if (r32.length === 16 && r16.length === 8) {
+    const r16_mapping = [
+      [0, 2], [1, 3], [4, 6], [5, 7], [8, 10], [9, 11], [12, 14], [13, 15]
+    ];
     for (let i = 0; i < 8; i++) {
-      const w1 = getWinner(r32[i * 2]);
-      const w2 = getWinner(r32[i * 2 + 1]);
+      const w1 = getWinner(r32[r16_mapping[i][0]]);
+      const w2 = getWinner(r32[r16_mapping[i][1]]);
       await updateMatchIfNeeded(r16[i], w1, w2);
     }
   }
 
   // 3. Cascade R16 -> QF
   if (r16.length === 8 && qf.length === 4) {
+    const qf_mapping = [
+      [0, 1], [4, 5], [2, 3], [6, 7]
+    ];
     for (let i = 0; i < 4; i++) {
-      const w1 = getWinner(r16[i * 2]);
-      const w2 = getWinner(r16[i * 2 + 1]);
+      const w1 = getWinner(r16[qf_mapping[i][0]]);
+      const w2 = getWinner(r16[qf_mapping[i][1]]);
       await updateMatchIfNeeded(qf[i], w1, w2);
     }
   }
 
   // 4. Cascade QF -> SF
   if (qf.length === 4 && sf.length === 2) {
+    const sf_mapping = [
+      [0, 1], [2, 3]
+    ];
     for (let i = 0; i < 2; i++) {
-      const w1 = getWinner(qf[i * 2]);
-      const w2 = getWinner(qf[i * 2 + 1]);
+      const w1 = getWinner(qf[sf_mapping[i][0]]);
+      const w2 = getWinner(qf[sf_mapping[i][1]]);
       await updateMatchIfNeeded(sf[i], w1, w2);
     }
   }

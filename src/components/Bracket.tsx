@@ -307,8 +307,7 @@ type SideRound = {
 
 function buildSideRounds(
   matchesByRound: Record<string, Match[]>,
-  startIndex: number,
-  count: number,
+  isRightSide: boolean,
 ): SideRound[] {
   return KNOCKOUT_ROUNDS.map((roundName, i) => {
     const all = matchesByRound[roundName] ?? [];
@@ -316,7 +315,22 @@ function buildSideRounds(
       (a, b) =>
         new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime(),
     );
-    const slice = sorted.slice(startIndex, startIndex + count);
+
+    let slice: Match[] = [];
+    if (roundName === "Round of 32") {
+      slice = isRightSide ? sorted.slice(8, 16) : sorted.slice(0, 8);
+    } else if (roundName === "Round of 16") {
+      slice = isRightSide ? sorted.slice(4, 8) : sorted.slice(0, 4);
+    } else if (roundName === "Quarter-finals") {
+      slice = isRightSide
+        ? [sorted[1], sorted[3]].filter(Boolean)
+        : [sorted[0], sorted[2]].filter(Boolean);
+    } else if (roundName === "Semi-finals") {
+      slice = isRightSide
+        ? [sorted[1]].filter(Boolean)
+        : [sorted[0]].filter(Boolean);
+    }
+
     return {
       roundName,
       label: ROUND_LABELS[roundName] ?? roundName,
@@ -364,12 +378,8 @@ export default function Bracket({
     return Math.ceil(total / 2);
   }
 
-  const leftRounds = buildSideRounds(matchesByRound, 0, 8); // first half
-  const rightRounds = buildSideRounds(
-    matchesByRound,
-    (matchesByRound["Round of 32"] ?? []).length / 2,
-    8,
-  );
+  const leftRounds = buildSideRounds(matchesByRound, false);
+  const rightRounds = buildSideRounds(matchesByRound, true);
 
   // Build connector data
   function buildConnectors(
