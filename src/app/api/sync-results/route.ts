@@ -6,6 +6,8 @@ import { normalizeTeamName, normalizeRoundName } from "@/lib/sync/teams-map";
 import { calculateBestThirdsAndKnockouts } from "@/lib/sync/bracket-calculator";
 import { recalculateGroupStandings } from "@/lib/standings";
 
+export const dynamic = "force-dynamic";
+
 const FOOTBALL_DATA_API_URL = "http://api.football-data.org/v4";
 
 type ApiMatch = {
@@ -20,6 +22,8 @@ type ApiMatch = {
     winner: string | null;
     duration: string;
     fullTime: { home: number | null; away: number | null };
+    regularTime?: { home: number | null; away: number | null };
+    extraTime?: { home: number | null; away: number | null };
     penalties?: { home: number | null; away: number | null };
   };
 };
@@ -259,14 +263,33 @@ export async function POST(request: Request) {
 
     // For penalty matches the API includes penalty goals in fullTime.
     // Use regularTime (actual 90' score) if available, fallback to fullTime.
-    const apiHomeScore = apiMatch.score.regularTime?.home ?? apiMatch.score.fullTime.home;
-    const apiAwayScore = apiMatch.score.regularTime?.away ?? apiMatch.score.fullTime.away;
+    let apiHomeScore = apiMatch.score.regularTime?.home ?? apiMatch.score.fullTime.home;
+    let apiAwayScore = apiMatch.score.regularTime?.away ?? apiMatch.score.fullTime.away;
 
     const hasPenalties =
       apiMatch.score?.penalties?.home != null &&
       apiMatch.score?.penalties?.away != null;
-    let penaltyWinner: string | null = null;
+    const isPenaltyShootout = apiMatch.score?.duration === "PENALTY_SHOOTOUT" || hasPenalties;
 
+    // Subtraction fallback if regularTime is missing but we went to penalties
+    if (isPenaltyShootout) {
+      if (apiMatch.score.regularTime?.home == null && apiMatch.score.fullTime.home != null && apiMatch.score.penalties?.home != null) {
+        apiHomeScore = apiMatch.score.fullTime.home - apiMatch.score.penalties.home;
+      }
+      if (apiMatch.score.regularTime?.away == null && apiMatch.score.fullTime.away != null && apiMatch.score.penalties?.away != null) {
+        apiAwayScore = apiMatch.score.fullTime.away - apiMatch.score.penalties.away;
+      }
+    }
+
+    // Handle reversed home/away teams in DB compared to API
+    const isReversed = dbMatch.home_team === normalizedAway && dbMatch.away_team === normalizedHome;
+    if (isReversed) {
+      const temp = apiHomeScore;
+      apiHomeScore = apiAwayScore;
+      apiAwayScore = temp;
+    }
+
+    let penaltyWinner: string | null = null;
     if (hasPenalties) {
       // Use score.winner (HOME_TEAM/AWAY_TEAM) — more reliable than comparing penalty counts
       if (apiMatch.score?.winner === "HOME_TEAM") penaltyWinner = normalizedHome;
@@ -280,7 +303,7 @@ export async function POST(request: Request) {
       }
     } else if (apiHomeScore !== apiAwayScore && isKnockout) {
       penaltyWinner =
-        apiHomeScore > apiAwayScore ? normalizedHome : normalizedAway;
+        apiHomeScore > apiAwayScore ? (isReversed ? normalizedAway : normalizedHome) : (isReversed ? normalizedHome : normalizedAway);
     }
 
     const scoreChanged =
@@ -313,7 +336,7 @@ export async function POST(request: Request) {
     if (scoreChanged) {
       const { data: predictions, error: predError } = await admin
         .from("predictions")
-        .select("id, home_score, away_score")
+        .select("id, home_score, away_score, predicted_advancer")
         .eq("match_id", dbMatch.id);
 
       if (predError) {
@@ -326,20 +349,14 @@ export async function POST(request: Request) {
       const isDraw = apiHomeScore === apiAwayScore;
       for (const pred of predictions ?? []) {
         let points: number;
-        if (hasPenalties && isDraw && isKnockout) {
-          let predictedAdvancer: string | null = null;
-          if (pred.home_score > pred.away_score)
-            predictedAdvancer = normalizedHome;
-          else if (pred.away_score > pred.home_score)
-            predictedAdvancer = normalizedAway;
-
+        if (isPenaltyShootout && isDraw && isKnockout) {
           points = calculatePenaltyScore(
             pred.home_score,
             pred.away_score,
             apiHomeScore,
             apiAwayScore,
             penaltyWinner ?? "",
-            predictedAdvancer ?? "",
+            pred.predicted_advancer ?? "",
           );
         } else {
           points = calculateScore(
@@ -348,11 +365,7 @@ export async function POST(request: Request) {
             apiHomeScore,
             apiAwayScore,
             penaltyWinner,
-            penaltyWinner && isDraw && isKnockout
-              ? penaltyWinner === normalizedHome
-                ? normalizedHome
-                : normalizedAway
-              : null,
+            pred.predicted_advancer,
           );
         }
 
