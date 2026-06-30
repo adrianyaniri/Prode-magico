@@ -148,7 +148,31 @@ export async function calculateBestThirdsAndKnockouts(
     return 0;
   }
 
-  const r32 = koMatches.filter(m => m.round_name === "Round of 32");
+  // Helper to map API IDs to true FIFA Match Numbers (73-88)
+  // The football-data.org API assigned incorrect kickoff times and match numbers to the R32.
+  // This map ensures W73 is actually Match 73, W74 is Match 74, etc., fixing the cascade automatically.
+  const trueR32Order = [
+    537417, // Match 73
+    537415, // Match 74
+    537418, // Match 75
+    537423, // Match 76
+    537424, // Match 77
+    537416, // Match 78
+    537425, // Match 79
+    537426, // Match 80
+    537422, // Match 81
+    537421, // Match 82
+    537420, // Match 83
+    537419, // Match 84
+    537429, // Match 85
+    537428, // Match 86
+    537427, // Match 87
+    537430  // Match 88
+  ];
+
+  const r32 = koMatches.filter((m) => m.round_name === "Round of 32").sort((a, b) => {
+    return trueR32Order.indexOf(a.api_id) - trueR32Order.indexOf(b.api_id);
+  });
   const r16 = koMatches.filter(m => m.round_name === "Round of 16");
   const qf = koMatches.filter(m => m.round_name === "Quarter-finals");
   const sf = koMatches.filter(m => m.round_name === "Semi-finals");
@@ -200,9 +224,27 @@ export async function calculateBestThirdsAndKnockouts(
   }
 
   // 2. Cascade R32 -> R16
+  // Re-enabled: The API is too slow to update R16 teams (they stay null/TBD for days).
+  // We calculate the confirmed FIFA 2026 bracket mapping manually here.
+  // Note: r16 array is sorted by kickoff_at. 
+  // r16[0] = Match 90 (July 4, 17:00 UTC): W73 vs W75
+  // r16[1] = Match 89 (July 4, 21:00 UTC): W74 vs W77
+  // r16[2] = Match 91: W76 vs W78
+  // r16[3] = Match 92: W79 vs W80
+  // r16[4] = Match 93: W83 vs W84
+  // r16[5] = Match 94: W81 vs W82
+  // r16[6] = Match 95: W86 vs W88
+  // r16[7] = Match 96: W85 vs W87
   if (r32.length === 16 && r16.length === 8) {
     const r16_mapping = [
-      [0, 2], [1, 3], [4, 6], [5, 7], [8, 10], [9, 11], [12, 14], [13, 15]
+      [0, 2], // r16[0] = Match 90
+      [1, 4], // r16[1] = Match 89
+      [3, 5], // r16[2] = Match 91
+      [6, 7], // r16[3] = Match 92
+      [10, 11], // r16[4] = Match 93
+      [8, 9], // r16[5] = Match 94
+      [13, 15], // r16[6] = Match 95
+      [12, 14]  // r16[7] = Match 96
     ];
     for (let i = 0; i < 8; i++) {
       const w1 = getWinner(r32[r16_mapping[i][0]]);

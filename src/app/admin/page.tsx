@@ -1,7 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import SyncButton from "@/components/SyncButton";
-import RepopulateButton from "@/components/RepopulateButton";
 import { TEAM_NAMES_ES } from "@/lib/sync/teams-es";
 import { esRound } from "@/lib/sync/round-names";
 
@@ -137,18 +136,6 @@ export default async function AdminOverview() {
           Sincronizar Resultados desde API
         </h2>
         <SyncButton />
-      </div>
-
-      {/* Repopulate all data */}
-      <div className="rounded-xl border border-amber-900/40 bg-[#1a1a24] p-4">
-        <h2 className="mb-1 text-sm font-medium text-white">
-          Repoblar Base de Datos
-        </h2>
-        <p className="mb-3 text-xs text-zinc-500">
-          Reemplaza TODOS los partidos y tablas de posiciones con los datos de
-          la API oficial. Usar solo después de ejecutar la migración SQL.
-        </p>
-        <RepopulateButton />
       </div>
 
       {/* Quick links */}

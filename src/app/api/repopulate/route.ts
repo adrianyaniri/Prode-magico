@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeTeamName, normalizeRoundName } from "@/lib/sync/teams-map";
+import { calculateBestThirdsAndKnockouts } from "@/lib/sync/bracket-calculator";
 
 const FOOTBALL_DATA_API_URL = "http://api.football-data.org/v4";
 
@@ -103,14 +104,22 @@ export async function POST(request: Request) {
       const homeTeam = m.homeTeam?.name ? normalizeTeamName(m.homeTeam.name) : "TBD";
       const awayTeam = m.awayTeam?.name ? normalizeTeamName(m.awayTeam.name) : "TBD";
 
-      const homeScore = m.score?.fullTime?.home ?? null;
-      const awayScore = m.score?.fullTime?.away ?? null;
+      // For penalty matches the API includes penalty goals in fullTime score.
+      // Use regularTime if available (actual 90' score), fallback to fullTime.
+      const homeScore = m.score?.regularTime?.home ?? m.score?.fullTime?.home ?? null;
+      const awayScore = m.score?.regularTime?.away ?? m.score?.fullTime?.away ?? null;
       const groupName = m.group ? m.group.replace("GROUP_", "") : null;
 
       let penaltyWinner: string | null = null;
-      if (m.score?.penalties?.home != null && m.score?.penalties?.away != null) {
-        penaltyWinner =
-          m.score.penalties.home > m.score.penalties.away ? homeTeam : awayTeam;
+      const hasPenalties = m.score?.penalties?.home != null && m.score?.penalties?.away != null;
+      if (hasPenalties) {
+        // Use score.winner (HOME_TEAM/AWAY_TEAM) — more reliable than comparing penalty counts
+        if (m.score?.winner === "HOME_TEAM") penaltyWinner = homeTeam;
+        else if (m.score?.winner === "AWAY_TEAM") penaltyWinner = awayTeam;
+        else {
+          // Fallback: compare penalty counts
+          penaltyWinner = m.score!.penalties!.home! > m.score!.penalties!.away! ? homeTeam : awayTeam;
+        }
       } else if (
         ["FINISHED", "IN_PLAY", "PAUSED"].includes(m.status) &&
         homeScore !== null &&
@@ -166,10 +175,15 @@ export async function POST(request: Request) {
       }
     }
 
+    // Recalculate knockout bracket (R16, QF, SF, Final) from updated results.
+    // This is the single source of truth — no need to call sync-results separately.
+    const bracketUpdates = await calculateBestThirdsAndKnockouts(adminClient);
+
     return NextResponse.json({ 
       success: true, 
       matchesInserted: dbMatches.length,
       standingsSaved: standingsData.reduce((sum, st) => sum + st.table.length, 0),
+      bracketUpdates,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

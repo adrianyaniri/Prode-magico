@@ -257,8 +257,10 @@ export async function POST(request: Request) {
     )
       continue;
 
-    const apiHomeScore = apiMatch.score.fullTime.home;
-    const apiAwayScore = apiMatch.score.fullTime.away;
+    // For penalty matches the API includes penalty goals in fullTime.
+    // Use regularTime (actual 90' score) if available, fallback to fullTime.
+    const apiHomeScore = apiMatch.score.regularTime?.home ?? apiMatch.score.fullTime.home;
+    const apiAwayScore = apiMatch.score.regularTime?.away ?? apiMatch.score.fullTime.away;
 
     const hasPenalties =
       apiMatch.score?.penalties?.home != null &&
@@ -266,10 +268,16 @@ export async function POST(request: Request) {
     let penaltyWinner: string | null = null;
 
     if (hasPenalties) {
-      penaltyWinner =
-        apiMatch.score.penalties!.home! > apiMatch.score.penalties!.away!
-          ? normalizedHome
-          : normalizedAway;
+      // Use score.winner (HOME_TEAM/AWAY_TEAM) — more reliable than comparing penalty counts
+      if (apiMatch.score?.winner === "HOME_TEAM") penaltyWinner = normalizedHome;
+      else if (apiMatch.score?.winner === "AWAY_TEAM") penaltyWinner = normalizedAway;
+      else {
+        // Fallback: compare penalty counts
+        penaltyWinner =
+          apiMatch.score.penalties!.home! > apiMatch.score.penalties!.away!
+            ? normalizedHome
+            : normalizedAway;
+      }
     } else if (apiHomeScore !== apiAwayScore && isKnockout) {
       penaltyWinner =
         apiHomeScore > apiAwayScore ? normalizedHome : normalizedAway;
