@@ -223,73 +223,14 @@ export async function calculateBestThirdsAndKnockouts(
     return null;
   }
 
-  // 2. Cascade R32 -> R16
-  // Re-enabled: The API is too slow to update R16 teams (they stay null/TBD for days).
-  // We calculate the confirmed FIFA 2026 bracket mapping manually here.
-  // Note: r16 array is sorted by kickoff_at. 
-  // r16[0] = Match 90 (July 4, 17:00 UTC): W73 vs W75
-  // r16[1] = Match 89 (July 4, 21:00 UTC): W74 vs W77
-  // r16[2] = Match 91: W76 vs W78
-  // r16[3] = Match 92: W79 vs W80
-  // r16[4] = Match 93: W83 vs W84
-  // r16[5] = Match 94: W81 vs W82
-  // r16[6] = Match 95: W86 vs W88
-  // r16[7] = Match 96: W85 vs W87
-  if (r32.length === 16 && r16.length === 8) {
-    const r16_mapping = [
-      [0, 2], // r16[0] = Match 90
-      [1, 4], // r16[1] = Match 89
-      [3, 5], // r16[2] = Match 91
-      [6, 7], // r16[3] = Match 92
-      [10, 11], // r16[4] = Match 93
-      [8, 9], // r16[5] = Match 94
-      [13, 15], // r16[6] = Match 95
-      [12, 14]  // r16[7] = Match 96
-    ];
-    for (let i = 0; i < 8; i++) {
-      const w1 = getWinner(r32[r16_mapping[i][0]]);
-      const w2 = getWinner(r32[r16_mapping[i][1]]);
-      await updateMatchIfNeeded(r16[i], w1, w2);
-    }
-  }
-
-  // 3. Cascade R16 -> QF
-  if (r16.length === 8 && qf.length === 4) {
-    const qf_mapping = [
-      [0, 1], [4, 5], [2, 3], [6, 7]
-    ];
-    for (let i = 0; i < 4; i++) {
-      const w1 = getWinner(r16[qf_mapping[i][0]]);
-      const w2 = getWinner(r16[qf_mapping[i][1]]);
-      await updateMatchIfNeeded(qf[i], w1, w2);
-    }
-  }
-
-  // 4. Cascade QF -> SF
-  if (qf.length === 4 && sf.length === 2) {
-    const sf_mapping = [
-      [0, 1], [2, 3]
-    ];
-    for (let i = 0; i < 2; i++) {
-      const w1 = getWinner(qf[sf_mapping[i][0]]);
-      const w2 = getWinner(qf[sf_mapping[i][1]]);
-      await updateMatchIfNeeded(sf[i], w1, w2);
-    }
-  }
-
-  // 5. Cascade SF -> Third Place & Final
-  if (sf.length === 2) {
-    if (tp.length === 1) {
-      const l1 = getLoser(sf[0]);
-      const l2 = getLoser(sf[1]);
-      await updateMatchIfNeeded(tp[0], l1, l2);
-    }
-    if (fn.length === 1) {
-      const w1 = getWinner(sf[0]);
-      const w2 = getWinner(sf[1]);
-      await updateMatchIfNeeded(fn[0], w1, w2);
-    }
-  }
+  // 2–5. Knockout cascade DISABLED
+  // The football-data.org API is now the single source of truth for ALL knockout
+  // pairings (R16 → QF → SF → Final). The cascade was overriding API data with
+  // incorrect assignments due to mismatched kickoff_at ordering in the DB.
+  //
+  // The API updates teams automatically as previous rounds finish, so we trust
+  // its data for all bracket rounds. If this proves too slow again in the future,
+  // re-enable with correct kickoff_at times matching FIFA's official schedule.
 
   return updates;
 }

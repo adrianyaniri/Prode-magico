@@ -274,10 +274,10 @@ export async function POST(request: Request) {
     // Subtraction fallback if regularTime is missing but we went to penalties
     if (isPenaltyShootout) {
       if (apiMatch.score.regularTime?.home == null && apiMatch.score.fullTime.home != null && apiMatch.score.penalties?.home != null) {
-        apiHomeScore = apiMatch.score.fullTime.home - apiMatch.score.penalties.home;
+        apiHomeScore = apiMatch.score.fullTime.home - (apiMatch.score.extraTime?.home ?? 0) - apiMatch.score.penalties.home;
       }
       if (apiMatch.score.regularTime?.away == null && apiMatch.score.fullTime.away != null && apiMatch.score.penalties?.away != null) {
-        apiAwayScore = apiMatch.score.fullTime.away - apiMatch.score.penalties.away;
+        apiAwayScore = apiMatch.score.fullTime.away - (apiMatch.score.extraTime?.away ?? 0) - apiMatch.score.penalties.away;
       }
     }
 
